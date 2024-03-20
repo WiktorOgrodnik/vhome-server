@@ -6,10 +6,9 @@ Grouplist-server to program, który uruchomiony na serwerze będzie świadczył 
 
 ## Technologie
 
-- Node.js
+- rust
 - postgresql
-- express.js
-- postgres-node
+- tide
 
 ## Tabele
 ```
@@ -76,4 +75,3 @@ assigns {
 
 
 ```
-
