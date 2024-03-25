@@ -1,10 +1,8 @@
 [package]
-name = "grouplist-server"
+default-run = "cli"
+name = "grouplist-backend"
 version = "0.1.0"
 edition = "2021"
-
-[workspace]
-members = [ "libgrouplist" ]
 
 [dependencies]
 tide = "0.16.0"
@@ -12,16 +10,18 @@ async-std = { version = "1.8.0", features = ["attributes"] }
 serde = { version = "1.0", features = ["derive"] }
 sqlx = { version = "0.7.4", features = ["runtime-async-std", "postgres"]}
 
-libgrouplist = { path = "libgrouplist" }
+dotenv = "0.15.0"
+clap = { version = "4.5.3", features = ["derive"] }
+enum_dispatch = "0.3.12"
 
 [lib]
 name = "lib"
-path = "src/server/lib.rs"
+path = "src/lib.rs"
 
 [[bin]]
-name = "grouplist-server"
-path = "src/server/main.rs"
+name = "server"
+path = "src/apps/server.rs"
 
 [[bin]]
-name = "grouplist-cli"
-path = "src/cli/main.rs"
+name = "cli"
+path = "src/apps/cli.rs"
