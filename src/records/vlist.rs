@@ -1,4 +1,3 @@
-use clap::Args;
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgQueryResult, PgPool};
 
@@ -10,15 +9,11 @@ pub struct Data {
     pub name: String,
 }
 
-#[derive(Args)]
 pub struct _AddInterface {
-    #[arg(long)]
     pub name: String
 }
 
-#[derive(Args)]
 pub struct _ShowDeleteInterface {
-    #[arg(long, default_value = "-1")]
     pub id: i32,
 }
 
@@ -26,7 +21,7 @@ pub type AddInterface = _AddInterface;
 pub type ShowInterface = _ShowDeleteInterface;
 pub type DeleteInterface = _ShowDeleteInterface;
 
-impl RecordAdd for Data {
+impl RecordAdd for _AddInterface {
     type AddInterface = AddInterface;
 
     async fn add(db: &PgPool, interface: &AddInterface) -> Result<PgQueryResult, sqlx::Error> {

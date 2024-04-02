@@ -6,7 +6,7 @@ pub trait RecordAdd {
     type AddInterface;
 
     fn add(db: &PgPool, interface: &Self::AddInterface) -> impl std::future::Future<Output=Result<PgQueryResult, sqlx::Error>> + Send 
-        where Self: Sized; 
+        where Self: Sized;
 }
 
 pub trait RecordShow {
