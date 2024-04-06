@@ -1,5 +1,5 @@
 [package]
-default-run = "server"
+default-run = "cli"
 name = "grouplist-backend"
 version = "0.1.0"
 edition = "2021"
@@ -11,11 +11,19 @@ serde = { version = "1.0", features = ["derive"] }
 sqlx = { version = "0.7.4", features = ["runtime-async-std", "postgres"]}
 
 dotenv = "0.15.0"
+bcrypt = "0.15.1"
+
+clap = { version = "4.5.3", features = ["derive"] }
+strum = { version = "0.26.2", features = ["derive", "strum_macros"] }
 
 [lib]
 name = "lib"
 path = "src/lib.rs"
 
 [[bin]]
+name = "cli"
+path = "src/apps/cli.rs"
+
+[[bin]]
 name = "server"
-path = "src/server.rs"
+path = "src/apps/server.rs"

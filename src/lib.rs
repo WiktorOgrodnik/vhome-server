@@ -1,6 +1,7 @@
 use core::time;
 use std::env;
 
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::{PgPoolOptions, PgPool};
 
 pub type Request = tide::Request<State>;
@@ -10,7 +11,12 @@ pub struct State {
     pub db: PgPool,
 }
 
-async fn db_connection() -> Result<PgPool, sqlx::Error> {
+#[derive(Serialize, Deserialize)]
+pub struct Message {
+    message: String,
+}
+
+pub async fn db_connection() -> Result<PgPool, sqlx::Error> {
     let database_url = env::var("DATABASE_URL").unwrap();
     
     let pool = PgPoolOptions::new()
@@ -32,4 +38,6 @@ pub mod routes {
     pub mod vlist;
     pub mod admin;
     pub mod authenticate;
+    pub mod greet;
+    pub mod vgroup;
 }
