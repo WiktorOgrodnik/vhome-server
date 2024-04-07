@@ -1,13 +1,6 @@
-use serde::{Serialize, Deserialize};
 use tide::{Response, StatusCode};
 
-use crate::{records::{vgroup::{self, Participation}, vuser}, Message};
-
-#[derive(Debug, Serialize, Deserialize)]
-struct UserGroupSessionInd {
-    group: vgroup::Data,
-    roles: Vec<vgroup::Participation>,
-}
+use crate::{records::{vgroup::{self, Participation, UserGroupSessionInd}, vuser}, Message};
 
 
 pub async fn set_for_user(mut request: crate::Request, user: vuser::Data) -> tide::Result {

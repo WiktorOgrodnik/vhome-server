@@ -1,35 +1,17 @@
-use lib::records::vuser;
-use tide::{Middleware, Next, Redirect, Request, Response, Route, StatusCode};
+use lib::records::vgroup::Participation;
+use tide::{Redirect, Response, StatusCode};
 use tide::http::Cookie;
+
+use sqlx::postgres::PgPool;
 
 use dotenv::dotenv;
 
-use lib::{db_connection_tide, State};
+use lib::State;
 use lib::routes;
+use lib::authentication::AuthorizeRouteExt;
 
-pub trait AuthorizeRouteExt {
-    fn authorized(&mut self) -> &mut Self;
-}
-
-impl<'a, State> AuthorizeRouteExt for Route<'a, State>
-    where State: Clone + Send + Sync + 'static {
-    fn authorized(&mut self) -> &mut Self {
-        self.with(MustAuthenticateMiddleWare {})
-    }
-}
-
-struct MustAuthenticateMiddleWare;
-
-#[tide::utils::async_trait]
-impl<State> Middleware<State> for MustAuthenticateMiddleWare
-    where State: Clone + Send + Sync + 'static {
-    async fn handle(&self, req: Request<State>, next: Next<'_, State>) -> tide::Result {
-        let user: Option<vuser::Data> = req.session().get("user");
-        match user {
-            Some(_user) => Ok(next.run(req).await),
-            None => Ok(Redirect::new("/home").into()),
-        }        
-    }
+async fn db_connection() -> tide::Result<PgPool> {
+    Ok(lib::db_connection().await?)
 }
 
 async fn insert_cookie(_req: lib::Request) -> tide::Result {
@@ -52,7 +34,7 @@ async fn remove_cookie(_req: lib::Request) -> tide::Result {
 async fn main() -> tide::Result<()> {
     dotenv().ok();
 
-    let db = db_connection_tide().await?;
+    let db = db_connection().await?;
     let mut app = tide::with_state(State {db: db.clone()});
     
     app.with(tide::log::LogMiddleware::new());
@@ -72,24 +54,24 @@ async fn main() -> tide::Result<()> {
     
     // Set group
     app.at("/setgroup/:group_id")
-        .authorized()
+        .authorized(vec![])
         .get(routes::vgroup::get)
         .post(routes::vgroup::set)
         .delete(routes::vgroup::unregister);
 
     // Get lists
     app.at("/lists")
-        .authorized()
-        .get(routes::vlist::list);
+        .authorized_group(vec![Participation::Member])
+        .get(routes::vlist::all);
 
     app.at("/list/:list_id")
-        .authorized()
+        .authorized_group(vec![Participation::Member])
         .get(routes::vlist::show);
 
     // Session management
     app.at("/authenticate").post(routes::authenticate::login);
     app.at("/logout").post(routes::authenticate::logout);
-    app.at("/admin").authorized().get(routes::admin::main);
+    app.at("/admin").authorized(vec![]).get(routes::admin::main);
     
     // Cookie debug
     app.at("/set").get(insert_cookie);

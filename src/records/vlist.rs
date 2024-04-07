@@ -4,6 +4,7 @@ use sqlx::{postgres::PgQueryResult, PgPool};
 #[derive(sqlx::FromRow, Debug, Deserialize, Serialize)]
 pub struct Data {
     pub id: i32,
+    #[sqlx(default)]
     pub group_id: i32,
     pub name: String,
 }
@@ -14,6 +15,7 @@ pub struct _AddInterface {
 
 pub struct _ShowDeleteInterface {
     pub id: i32,
+    pub group_id: i32,
 }
 
 pub type AddInterface = _AddInterface;
@@ -31,11 +33,12 @@ impl Data {
         ).execute(db).await
     }
 
-    pub async fn all(db: &PgPool) -> Result<Vec<Self>, sqlx::Error> {
+    pub async fn all(db: &PgPool, interface: i32) -> Result<Vec<Self>, sqlx::Error> {
         sqlx::query_as!(Self,
             "
-            SELECT * FROM vlist
-            "
+            SELECT * FROM vlist WHERE vlist.group_id = $1
+            ",
+            interface,
         ).fetch_all(db).await
     }
 
@@ -43,9 +46,10 @@ impl Data {
         sqlx::query_as!(Self,
             "
             SELECT * FROM vlist
-            WHERE vlist.id = $1
+            WHERE vlist.id = $1 AND vlist.group_id = $2
             ",
-            interface.id
+            interface.id,
+            interface.group_id,
         ).fetch_one(db).await
     }
 

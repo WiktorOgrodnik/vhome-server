@@ -28,10 +28,6 @@ pub async fn db_connection() -> Result<PgPool, sqlx::Error> {
     Ok(pool)
 }
 
-pub async fn db_connection_tide() -> tide::Result<PgPool> {
-    Ok(db_connection().await?)
-}
-
 pub mod records;
 
 pub mod routes {
@@ -41,3 +37,5 @@ pub mod routes {
     pub mod greet;
     pub mod vgroup;
 }
+
+pub mod authentication;
