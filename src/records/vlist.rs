@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgQueryResult, PgPool};
 
+use crate::authentication::authorize;
+use crate::roles::AuthorizeLevel;
+
 #[derive(sqlx::FromRow, Debug, Deserialize, Serialize)]
 pub struct Data {
     pub id: i32,
@@ -42,16 +45,25 @@ impl Data {
         ).fetch_all(db).await
     }
 
-    pub async fn get(db: &PgPool, interface: &ShowInterface) -> Result<Self, sqlx::Error> {
+    pub async fn get(db: &PgPool, list_id: i32) -> Result<Self, sqlx::Error> {
         sqlx::query_as!(Self,
             "
-            SELECT * FROM vlist
-            WHERE vlist.id = $1 AND vlist.group_id = $2
+            SELECT * FROM vlist WHERE vlist.id = $1
+            ",
+            list_id,
+        ).fetch_one(db).await
+    }
+
+    pub async fn get_guarded(db: &PgPool, interface: &ShowInterface) -> Result<Self, sqlx::Error> {
+        sqlx::query_as!(Self,
+            "
+            SELECT * FROM vlist WHERE vlist.id = $1 AND vlist.group_id = $2
             ",
             interface.id,
             interface.group_id,
         ).fetch_one(db).await
     }
+
 
     pub async fn delete(db: &PgPool, interface: &DeleteInterface) -> Result<PgQueryResult, sqlx::Error> {
         sqlx::query!(
@@ -63,3 +75,37 @@ impl Data {
     }
 }
 
+
+pub enum VResult {
+    Ok(i32),
+    Forbidden,
+    NotFound,
+    None,
+}
+
+impl VResult {
+    pub async fn authorize(self, request: &crate::Request, level: AuthorizeLevel) -> Self {
+
+        match self {
+            Self::Ok(id) => {
+                let group_id = Data::get(&request.state().db, id).await;
+
+                match group_id {
+                    Ok(querry) => if authorize(request, level, Some(querry.group_id)).await { Self::Ok(id) } else { Self::Forbidden },
+                    Err(_) => Self::NotFound,
+                }
+
+            },
+            Self::Forbidden => Self::Forbidden,
+            Self::NotFound => Self::NotFound,
+            Self::None => Self::None,
+        }
+    }
+
+    pub fn to_some(self) -> Option<i32> {
+        match self {
+            VResult::Ok(id) => Some(id),
+            _   => None,
+        }
+    }
+}

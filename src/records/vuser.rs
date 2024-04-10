@@ -6,7 +6,7 @@ use sqlx::{postgres::PgQueryResult, prelude::FromRow, PgPool};
 use clap::Args;
 use bcrypt::{DEFAULT_COST, hash, verify, BcryptError};
 
-use crate::records::vgroup::Participation;
+use crate::roles::Roles;
 
 #[derive(sqlx::FromRow, Debug, Deserialize, Serialize)]
 pub struct Data {
@@ -120,7 +120,7 @@ impl Data {
         ).execute(db).await
     }
 
-    pub async fn get_group_participation(&self, db: &PgPool, interface: i32) -> Result<Vec<Participation>, Error> {
+    pub async fn get_group_participation(&self, db: &PgPool, interface: i32) -> Result<Vec<Roles>, Error> {
         use Error::DatabaseError;
         
         #[derive(FromRow, Deserialize)]
@@ -140,8 +140,8 @@ impl Data {
             .await
             .map_err(|e| DatabaseError(e))?
             .iter()
-            .map(|t| Participation::from_str(&t.name).unwrap_or(Participation::Guest))
-            .collect::<Vec<Participation>>())
+            .map(|t| Roles::from_str(&t.name).unwrap_or(Roles::Guest))
+            .collect::<Vec<Roles>>())
     }
 }
 

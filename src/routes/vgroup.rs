@@ -1,7 +1,8 @@
 use tide::{Response, StatusCode};
+use crate::session_utils::UserGroupSessionInd;
 
-use crate::{records::{vgroup::{self, Participation, UserGroupSessionInd}, vuser}, Message};
-
+use crate::{records::{vgroup, vuser}, Message};
+use crate::roles::Roles;
 
 pub async fn set_for_user(mut request: crate::Request, user: vuser::Data) -> tide::Result {
     let group_id: i32 = request.param("group_id")?.parse()?;
@@ -10,7 +11,7 @@ pub async fn set_for_user(mut request: crate::Request, user: vuser::Data) -> tid
     let roles = user.get_group_participation(
         &request.state().db, 
         group_id,
-    ).await.unwrap(); //to-do make vuser::Error error
+    ).await.unwrap(); //.map_err(|e| tide::Error::new(500, e))?; //to-do make vuser::Error error
 
    /*  .map_err(|err| {
         use vuser::Error;
@@ -22,7 +23,7 @@ pub async fn set_for_user(mut request: crate::Request, user: vuser::Data) -> tid
     }))?;
  */
     let status = if roles.iter()
-        .filter(|&elt| matches!(elt, Participation::Member))
+        .filter(|&elt| matches!(elt, Roles::Member))
         .count() > 0 {
         request.session_mut().insert(
             "user_group",

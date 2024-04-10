@@ -36,6 +36,10 @@ pub mod routes {
     pub mod authenticate;
     pub mod greet;
     pub mod vgroup;
+    pub mod vtask;
 }
 
+pub mod roles;
+pub mod session_utils;
 pub mod authentication;
+

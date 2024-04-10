@@ -1,4 +1,4 @@
-use lib::records::vgroup::Participation;
+use lib::roles::Roles;
 use tide::{Redirect, Response, StatusCode};
 use tide::http::Cookie;
 
@@ -61,12 +61,25 @@ async fn main() -> tide::Result<()> {
 
     // Get lists
     app.at("/lists")
-        .authorized_group(vec![Participation::Member])
+        .authorized_group(vec![Roles::Member])
         .get(routes::vlist::all);
 
     app.at("/list/:list_id")
-        .authorized_group(vec![Participation::Member])
+        .authorized_group(vec![Roles::Member])
         .get(routes::vlist::show);
+    
+    // Get tasks
+    app.at("/tasks")
+        .authorized_group(vec![Roles::Guest, Roles::Member])
+        .get(routes::vtask::all);
+
+    app.at("/tasks/:list_id")
+        .authorized_group(vec![Roles::Guest, Roles::Member])
+        .get(routes::vtask::all);
+
+    app.at("/task/:task_id")
+        .authorized_group(vec![Roles::Guest, Roles::Member])
+        .get(routes::vtask::show);
 
     // Session management
     app.at("/authenticate").post(routes::authenticate::login);
