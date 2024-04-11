@@ -91,7 +91,9 @@ impl VResult {
                 let group_id = Data::get(&request.state().db, id).await;
 
                 match group_id {
-                    Ok(querry) => if authorize(request, level, Some(querry.group_id)).await { Self::Ok(id) } else { Self::Forbidden },
+                    Ok(querry) =>
+                        if authorize(request, level, Some(querry.group_id)).await { Self::Ok(id) } 
+                        else { Self::Forbidden },
                     Err(_) => Self::NotFound,
                 }
 
@@ -102,7 +104,7 @@ impl VResult {
         }
     }
 
-    pub fn to_some(self) -> Option<i32> {
+    pub fn ok(self) -> Option<i32> {
         match self {
             VResult::Ok(id) => Some(id),
             _   => None,
