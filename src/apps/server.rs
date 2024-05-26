@@ -75,11 +75,17 @@ async fn main() -> tide::Result<()> {
 
     app.at("/tasks/:list_id")
         .authorized_group(vec![Roles::Guest, Roles::Member])
-        .get(routes::vtask::all);
+        .get(routes::vtask::all)
+        .post(routes::vtask::add);
 
     app.at("/task/:task_id")
         .authorized_group(vec![Roles::Guest, Roles::Member])
-        .get(routes::vtask::show);
+        .get(routes::vtask::show)
+        .delete(routes::vtask::delete);
+
+    app.at("/task/completed/:task_id/:value")
+        .authorized_group(vec![Roles::Guest, Roles::Member])
+        .put(routes::vtask::set_completed);
 
     // Session management
     app.at("/authenticate").post(routes::authenticate::login);

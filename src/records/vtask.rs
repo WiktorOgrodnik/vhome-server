@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{PgPool, types::chrono};
+use sqlx::{postgres::PgQueryResult, types::chrono, PgPool};
 
 #[derive(sqlx::FromRow, Debug, Deserialize, Serialize)]
 pub struct Data {
@@ -9,6 +9,12 @@ pub struct Data {
     pub completed: bool,
     pub vlist_id: i32,
     pub completed_time: Option<chrono::DateTime<chrono::Utc>>, 
+}
+
+#[derive(Deserialize)]
+pub struct AddInterface {
+    pub title: String,
+    pub content: String,
 }
 
 impl Data {
@@ -34,7 +40,6 @@ impl Data {
         ).fetch_all(db).await
     }
 
-
     pub async fn all(db: &PgPool, vgroup_id: i32, vlist_id: Option<i32>) -> Result<Vec<Self>, sqlx::Error> {
         match vlist_id {
             Some(vlist_id) => Self::all_from_list(db, vgroup_id, vlist_id).await,
@@ -49,5 +54,46 @@ impl Data {
             ",
             interface,
         ).fetch_one(db).await
+    }
+    
+    pub async fn set_completed_guarded(db: &PgPool, vtask_id: i32, value: bool, vgroup_id: i32) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query!(
+            "
+            UPDATE vtask t
+            SET completed = $1
+            FROM vlist l
+            WHERE t.vlist_id = l.id AND t.id = $2 AND l.group_id = $3 
+            ",
+            value,
+            vtask_id,
+            vgroup_id,
+        ).execute(db).await
+    }
+
+    pub async fn add(db: &PgPool, vlist_id: i32, interface: AddInterface) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query!(
+            "
+            INSERT INTO vtask (
+                title,
+                content,
+                completed,
+                vlist_id,
+                completed_time )
+            VALUES ($1, $2, $3, $4, NULL)
+            ",
+            interface.title,
+            interface.content,
+            false,
+            vlist_id,
+        ).execute(db).await
+    }
+
+    pub async fn delete(db: &PgPool, vtask_id: i32) -> Result<PgQueryResult, sqlx::Error> {
+        sqlx::query!(
+        "
+        DELETE FROM vtask WHERE id = $1
+        ",
+        vtask_id
+        ).execute(db).await
     }
 }

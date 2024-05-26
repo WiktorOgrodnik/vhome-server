@@ -64,6 +64,10 @@ impl Data {
         ).fetch_one(db).await
     }
 
+    pub async fn has_permission(db: &PgPool, group_id: i32, id: i32) -> bool {
+        Self::get_guarded(db, &ShowInterface { id, group_id })
+            .await.is_ok()
+    }
 
     pub async fn delete(db: &PgPool, interface: &DeleteInterface) -> Result<PgQueryResult, sqlx::Error> {
         sqlx::query!(
