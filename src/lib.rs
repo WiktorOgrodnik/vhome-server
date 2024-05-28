@@ -37,6 +37,7 @@ pub mod routes {
     pub mod greet;
     pub mod vgroup;
     pub mod vtask;
+    pub mod device;
 }
 
 pub mod roles;

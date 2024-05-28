@@ -87,6 +87,14 @@ async fn main() -> tide::Result<()> {
         .authorized_group(vec![Roles::Guest, Roles::Member])
         .put(routes::vtask::set_completed);
 
+    app.at("/devices")
+        .authorized_group(vec![Roles::Guest, Roles::Member])
+        .get(routes::device::all);
+
+    app.at("/device/:device_id")
+        .authorized_group(vec![Roles::Guest, Roles::Member])
+        .get(routes::device::get);
+
     // Session management
     app.at("/authenticate").post(routes::authenticate::login);
     app.at("/logout").post(routes::authenticate::logout);
@@ -97,6 +105,6 @@ async fn main() -> tide::Result<()> {
     app.at("/get").get(get_cookie);
     app.at("/remove").get(remove_cookie);
 
-    app.listen("127.0.0.1:8080").await?;
+    app.listen("0.0.0.0:8080").await?;
     Ok(())
 }
