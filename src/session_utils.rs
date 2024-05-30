@@ -21,11 +21,13 @@ pub async fn get_user(request: &crate::Request) -> Result<vuser::Data, SessionEr
     user.ok_or(SessionError::UserNotLoggedIn)
 }
 
-pub async fn get_user_group_session_ind(request: &crate::Request) -> Result<UserGroupSessionInd, SessionError> {
+pub async fn get_user_group_session_ind(
+    request: &crate::Request,
+) -> Result<UserGroupSessionInd, SessionError> {
     let _ = get_user(request).await?;
 
     let group: Option<UserGroupSessionInd> = request.session().get("user_group");
-    
+
     group.ok_or(SessionError::GroupNotSelected)
 }
 

@@ -13,7 +13,7 @@ pub struct Data {
 }
 
 pub struct _AddInterface {
-    pub name: String
+    pub name: String,
 }
 
 pub struct _ShowDeleteInterface {
@@ -26,59 +26,74 @@ pub type ShowInterface = _ShowDeleteInterface;
 pub type DeleteInterface = _ShowDeleteInterface;
 
 impl Data {
-
     pub async fn add(db: &PgPool, interface: &AddInterface) -> Result<PgQueryResult, sqlx::Error> {
         sqlx::query!(
             "
             INSERT INTO vlist (name) VALUES ($1)
             ",
             interface.name
-        ).execute(db).await
+        )
+        .execute(db)
+        .await
     }
 
     pub async fn all(db: &PgPool, interface: i32) -> Result<Vec<Self>, sqlx::Error> {
-        sqlx::query_as!(Self,
+        sqlx::query_as!(
+            Self,
             "
             SELECT * FROM vlist WHERE vlist.group_id = $1
             ",
             interface,
-        ).fetch_all(db).await
+        )
+        .fetch_all(db)
+        .await
     }
 
     pub async fn get(db: &PgPool, list_id: i32) -> Result<Self, sqlx::Error> {
-        sqlx::query_as!(Self,
+        sqlx::query_as!(
+            Self,
             "
             SELECT * FROM vlist WHERE vlist.id = $1
             ",
             list_id,
-        ).fetch_one(db).await
+        )
+        .fetch_one(db)
+        .await
     }
 
     pub async fn get_guarded(db: &PgPool, interface: &ShowInterface) -> Result<Self, sqlx::Error> {
-        sqlx::query_as!(Self,
+        sqlx::query_as!(
+            Self,
             "
             SELECT * FROM vlist WHERE vlist.id = $1 AND vlist.group_id = $2
             ",
             interface.id,
             interface.group_id,
-        ).fetch_one(db).await
+        )
+        .fetch_one(db)
+        .await
     }
 
     pub async fn has_permission(db: &PgPool, group_id: i32, id: i32) -> bool {
         Self::get_guarded(db, &ShowInterface { id, group_id })
-            .await.is_ok()
+            .await
+            .is_ok()
     }
 
-    pub async fn delete(db: &PgPool, interface: &DeleteInterface) -> Result<PgQueryResult, sqlx::Error> {
+    pub async fn delete(
+        db: &PgPool,
+        interface: &DeleteInterface,
+    ) -> Result<PgQueryResult, sqlx::Error> {
         sqlx::query!(
             "
             DELETE FROM vlist WHERE id = $1
             ",
             interface.id
-        ).execute(db).await
+        )
+        .execute(db)
+        .await
     }
 }
-
 
 pub enum VResult {
     Ok(i32),
@@ -89,29 +104,25 @@ pub enum VResult {
 
 impl VResult {
     pub async fn authorize(self, request: &crate::Request, level: AuthorizeLevel) -> Self {
-
         match self {
-            Self::Ok(id) => {
-                let group_id = Data::get(&request.state().db, id).await;
-
-                match group_id {
-                    Ok(querry) =>
-                        if authorize(request, level, Some(querry.group_id)).await { Self::Ok(id) } 
-                        else { Self::Forbidden },
-                    Err(_) => Self::NotFound,
+            Self::Ok(id) => match Data::get(&request.state().db, id).await {
+                Ok(querry) => {
+                    if authorize(request, level, Some(querry.group_id)).await {
+                        Self::Ok(id)
+                    } else {
+                        Self::Forbidden
+                    }
                 }
-
+                Err(_) => Self::NotFound,
             },
-            Self::Forbidden => Self::Forbidden,
-            Self::NotFound => Self::NotFound,
-            Self::None => Self::None,
+            other => other,
         }
     }
 
     pub fn ok(self) -> Option<i32> {
         match self {
             VResult::Ok(id) => Some(id),
-            _   => None,
+            _ => None,
         }
     }
 }

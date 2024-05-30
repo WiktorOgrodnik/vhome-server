@@ -5,7 +5,7 @@ struct Message {
 
 pub async fn default(_: crate::Request) -> tide::Result<tide::Body> {
     let content = "Welcome to grouplist API!".to_owned();
-    let message = Message { content }; 
+    let message = Message { content };
 
-    Ok(tide::Body::from_json(&message)?)
+    tide::Body::from_json(&message)
 }

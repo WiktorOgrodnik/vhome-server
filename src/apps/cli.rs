@@ -2,11 +2,17 @@ use dotenv::dotenv;
 use lib::{db_connection, records::vuser};
 use sqlx::{postgres::PgQueryResult, PgPool};
 
-async fn add_user(db: &PgPool, user_args: &vuser::AddInterface) -> Result<PgQueryResult, vuser::Error> {
+async fn add_user(
+    db: &PgPool,
+    user_args: &vuser::AddInterface,
+) -> Result<PgQueryResult, vuser::Error> {
     vuser::Data::add(db, user_args).await
 }
 
-async fn add_user_to_group(db: &PgPool, user_group: &vuser::AddToGroupInterface) -> Result<PgQueryResult, vuser::Error> {
+async fn add_user_to_group(
+    db: &PgPool,
+    user_group: &vuser::AddToGroupInterface,
+) -> Result<PgQueryResult, vuser::Error> {
     vuser::Data::add_to_group(db, user_group).await
 }
 
@@ -33,8 +39,12 @@ async fn main() -> Result<(), sqlx::Error> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Some(Commands::AddUser(args)) => { add_user(&db, args).await.unwrap(); },
-        Some(Commands::AddUserToGroup(args)) => { add_user_to_group(&db, args).await.unwrap(); },
+        Some(Commands::AddUser(args)) => {
+            add_user(&db, args).await.unwrap();
+        }
+        Some(Commands::AddUserToGroup(args)) => {
+            add_user_to_group(&db, args).await.unwrap();
+        }
         None => {}
     }
 

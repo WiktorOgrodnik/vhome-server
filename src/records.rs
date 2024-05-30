@@ -1,6 +1,6 @@
-pub mod vlist;
-pub mod vuser;
-pub mod vgroup;
-pub mod vtask;
 pub mod device;
 pub mod thermometer;
+pub mod vgroup;
+pub mod vlist;
+pub mod vtask;
+pub mod vuser;

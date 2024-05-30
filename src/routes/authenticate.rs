@@ -1,9 +1,9 @@
-use tide::{Response, StatusCode};
 use crate::records::vuser;
+use tide::{Response, StatusCode};
 
 pub async fn login(mut req: crate::Request) -> tide::Result<String> {
     let creds: vuser::AddInterface = req.body_json().await?;
-    let id_opt = vuser::Data::passwd_verify(&req.state().db, &creds.into()).await;
+    let id_opt = vuser::Data::passwd_verify(&req.state().db, &creds).await;
 
     match id_opt {
         Ok(id) => {
@@ -12,8 +12,8 @@ pub async fn login(mut req: crate::Request) -> tide::Result<String> {
             req.session_mut().insert("user", user)?;
 
             Ok(format!("Logged user: {}", id).to_owned())
-        },
-        Err(_) => Ok(format!("User can not be logged in!").to_owned())
+        }
+        Err(_) => Ok("User can not be logged in!".to_owned()),
     }
 }
 

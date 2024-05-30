@@ -1,14 +1,13 @@
 use lib::roles::Roles;
-use tide::{Redirect, Response, StatusCode};
 use tide::http::Cookie;
+use tide::{Redirect, Response, StatusCode};
 
 use sqlx::postgres::PgPool;
 
 use dotenv::dotenv;
-
-use lib::State;
-use lib::routes;
 use lib::authentication::AuthorizeRouteExt;
+use lib::routes;
+use lib::State;
 
 async fn db_connection() -> tide::Result<PgPool> {
     Ok(lib::db_connection().await?)
@@ -35,8 +34,8 @@ async fn main() -> tide::Result<()> {
     dotenv().ok();
 
     let db = db_connection().await?;
-    let mut app = tide::with_state(State {db: db.clone()});
-    
+    let mut app = tide::with_state(State { db: db.clone() });
+
     app.with(tide::log::LogMiddleware::new());
 
     app.with(tide::sessions::SessionMiddleware::new(
@@ -51,7 +50,7 @@ async fn main() -> tide::Result<()> {
 
     app.at("/").get(Redirect::new("/home"));
     app.at("/home").get(routes::greet::default);
-    
+
     // Set group
     app.at("/setgroup/:group_id")
         .authorized(vec![])
@@ -67,7 +66,7 @@ async fn main() -> tide::Result<()> {
     app.at("/list/:list_id")
         .authorized_group(vec![Roles::Member])
         .get(routes::vlist::show);
-    
+
     // Get tasks
     app.at("/tasks")
         .authorized_group(vec![Roles::Guest, Roles::Member])
@@ -99,7 +98,7 @@ async fn main() -> tide::Result<()> {
     app.at("/authenticate").post(routes::authenticate::login);
     app.at("/logout").post(routes::authenticate::logout);
     app.at("/admin").authorized(vec![]).get(routes::admin::main);
-    
+
     // Cookie debug
     app.at("/set").get(insert_cookie);
     app.at("/get").get(get_cookie);

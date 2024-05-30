@@ -1,6 +1,6 @@
-use tide::{Route, Middleware, Next, Redirect};
+use crate::roles::{AuthorizeLevel, Roles};
 use crate::session_utils;
-use crate::roles::{Roles, AuthorizeLevel};
+use tide::{Middleware, Next, Redirect, Route};
 
 pub trait AuthorizeRouteExt {
     fn authorized(&mut self, roles: Vec<Roles>) -> &mut Self;
@@ -28,16 +28,20 @@ struct MustAuthenticateMiddleWare {
     roles: Vec<Roles>,
 }
 
-pub async fn authorize(request: &crate::Request, level: AuthorizeLevel, group_id: Option<i32>) -> bool {
+pub async fn authorize(
+    request: &crate::Request,
+    level: AuthorizeLevel,
+    group_id: Option<i32>,
+) -> bool {
     session_utils::get_user_group_session_ind(request)
         .await
-        .map(|group_ind| group_ind.roles
-            .iter()
-            .any(|role| role.has_authority(level)) &&
-            match group_id {
-                Some(group_id) => group_id == group_ind.group.id,
-                None => true,
-            })
+        .map(|group_ind| {
+            group_ind.roles.iter().any(|role| role.has_authority(level))
+                && match group_id {
+                    Some(group_id) => group_id == group_ind.group.id,
+                    None => true,
+                }
+        })
         .unwrap_or(false)
 }
 
@@ -62,9 +66,8 @@ impl MustAuthenticateMiddleWare {
 #[tide::utils::async_trait]
 impl Middleware<crate::State> for MustAuthenticateMiddleWare {
     async fn handle(&self, request: crate::Request, next: Next<'_, crate::State>) -> tide::Result {
-        
         let pred = match self.must_be_in_group {
-            true  => authorize(&request, self.required_authorization_level(), None).await,
+            true => authorize(&request, self.required_authorization_level(), None).await,
             false => session_utils::get_user(&request).await.is_ok(),
         };
 

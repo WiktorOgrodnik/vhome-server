@@ -18,12 +18,15 @@ pub struct Data {
 
 impl Data {
     pub async fn all(db: &PgPool, group_id: i32) -> Result<Vec<Self>, sqlx::Error> {
-        sqlx::query_as!(Self,
+        sqlx::query_as!(
+            Self,
             r#"
             SELECT id, group_id, name, dev_t AS "dev_t: _" FROM device WHERE device.group_id = $1
             "#,
             group_id,
-        ).fetch_all(db).await
+        )
+        .fetch_all(db)
+        .await
     }
 
     pub async fn get_guarded(db: &PgPool, dev_id: i32, group_id: i32) -> Result<Self, sqlx::Error> {

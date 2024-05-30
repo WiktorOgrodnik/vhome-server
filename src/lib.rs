@@ -2,7 +2,7 @@ use core::time;
 use std::env;
 
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::{PgPoolOptions, PgPool};
+use sqlx::postgres::{PgPool, PgPoolOptions};
 
 pub type Request = tide::Request<State>;
 
@@ -18,7 +18,7 @@ pub struct Message {
 
 pub async fn db_connection() -> Result<PgPool, sqlx::Error> {
     let database_url = env::var("DATABASE_URL").unwrap();
-    
+
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .max_lifetime(time::Duration::from_secs(5))
@@ -31,16 +31,15 @@ pub async fn db_connection() -> Result<PgPool, sqlx::Error> {
 pub mod records;
 
 pub mod routes {
-    pub mod vlist;
     pub mod admin;
     pub mod authenticate;
+    pub mod device;
     pub mod greet;
     pub mod vgroup;
+    pub mod vlist;
     pub mod vtask;
-    pub mod device;
 }
 
+pub mod authentication;
 pub mod roles;
 pub mod session_utils;
-pub mod authentication;
-
