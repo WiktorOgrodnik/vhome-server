@@ -102,6 +102,12 @@ pub enum VResult {
     None,
 }
 
+impl From<i32> for VResult {
+    fn from(value: i32) -> Self {
+        VResult::Ok(value)
+    }
+}
+
 impl VResult {
     pub async fn authorize(self, request: &crate::Request, level: AuthorizeLevel) -> Self {
         match self {

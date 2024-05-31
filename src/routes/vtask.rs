@@ -1,5 +1,6 @@
 use tide::StatusCode;
 
+use crate::records::vlist::VResult;
 use crate::roles::AuthorizeLevel;
 use crate::session_utils::{self, UserGroupSessionInd};
 
@@ -33,25 +34,30 @@ pub async fn all(request: crate::Request) -> tide::Result {
     })
 }
 
-pub async fn show(request: crate::Request) -> tide::Result<tide::Body> {
+pub async fn show(request: crate::Request) -> tide::Result {
     let group: Option<UserGroupSessionInd> = request.session().get("user_group");
     let group_id = group
         .expect("CRITICAL ERROR! Group is not defined for show list request!")
         .group
         .id;
 
-    let list_id = request.param("list_id")?.parse()?;
+    let list_id = request.param("list_id")?.parse::<i32>()?;
 
-    let vlists = vlist::Data::get_guarded(
-        &request.state().db,
-        &vlist::ShowInterface {
-            id: list_id,
-            group_id,
+    Ok(
+        match VResult::from(list_id)
+            .authorize(&request, AuthorizeLevel::Show)
+            .await
+        {
+            VResult::Ok(list_id) => tide::Response::builder(tide::StatusCode::Ok)
+                .body(tide::Body::from_json(
+                    &vtask::Data::get_guarded(&request.state().db, list_id, group_id).await?,
+                )?)
+                .header("content-type", "application/json;charset=UTF-8")
+                .build(),
+            VResult::None => todo!(),
+            _ => tide::Response::new(tide::StatusCode::NotFound),
         },
     )
-    .await?;
-
-    tide::Body::from_json(&vlists)
 }
 
 pub async fn set_completed(request: crate::Request) -> tide::Result {

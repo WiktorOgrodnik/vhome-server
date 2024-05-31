@@ -72,6 +72,26 @@ impl Data {
         .await
     }
 
+    pub async fn get_guarded(
+        db: &PgPool,
+        task_id: i32,
+        group_id: i32,
+    ) -> Result<Self, sqlx::Error> {
+        sqlx::query_as!(
+            Self,
+            "
+            SELECT t.*
+            FROM vtask as t
+            INNER JOIN vlist AS l ON t.vlist_id = l.id
+            WHERE t.id = $1 AND l.group_id = $2
+            ",
+            task_id,
+            group_id,
+        )
+        .fetch_one(db)
+        .await
+    }
+
     pub async fn set_completed_guarded(
         db: &PgPool,
         vtask_id: i32,
