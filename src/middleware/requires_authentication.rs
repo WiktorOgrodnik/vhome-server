@@ -1,4 +1,5 @@
 use axum::{
+    body::Body,
     extract::State,
     http::{HeaderMap, Request, StatusCode},
     middleware::Next,
@@ -13,12 +14,12 @@ use crate::{
     utilities::token::validate_token,
 };
 
-pub async fn requires_authentication<T>(
+pub async fn requires_authentication(
     State(db): State<DatabaseConnection>,
     State(secret): State<SecretWrapper>,
     headers: HeaderMap,
-    mut request: Request<T>,
-    next: Next<T>,
+    mut request: Request<Body>,
+    next: Next,
 ) -> Result<Response, StatusCode> {
     let header_token = if let Some(token) = headers.get("Authorization") {
         token

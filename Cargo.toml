@@ -7,15 +7,16 @@ edition = "2021"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 
-dotenv = "0.15.0"
+dotenvy = "0.15.7"
+dotenvy_macro = "0.15.7"
 bcrypt = "0.15.1"
 
-axum = { version = "0.6.20", features = ["macros"] }
+axum = { version = "0.7.5", features = ["macros"] }
 tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
 sea-orm = { version = "0.12.15", features = ["runtime-tokio-rustls", "sqlx-postgres"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 strum = { version = "0.26.3" }
-jsonwebtoken = "8.2.0"
+jsonwebtoken = "9.3.0"
 
 [lib]
 name = "lib"
