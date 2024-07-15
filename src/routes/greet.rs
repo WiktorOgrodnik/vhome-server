@@ -1,11 +1,13 @@
+use axum::{http::StatusCode, response::IntoResponse, Json};
+
 #[derive(serde::Serialize)]
 struct Message {
     content: String,
 }
 
-pub async fn default(_: crate::Request) -> tide::Result<tide::Body> {
+pub async fn default() -> impl IntoResponse {
     let content = "Welcome to grouplist API!".to_owned();
     let message = Message { content };
 
-    tide::Body::from_json(&message)
+    (StatusCode::OK, Json(message))
 }

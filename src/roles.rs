@@ -1,5 +1,5 @@
+use sea_orm::EnumIter;
 use serde::{Deserialize, Serialize};
-use strum::EnumString;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum AuthorizeLevel {
@@ -9,7 +9,7 @@ pub enum AuthorizeLevel {
     Manage,
 }
 
-#[derive(Debug, Clone, Copy, EnumString, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, EnumIter, Serialize, Deserialize, PartialEq)]
 pub enum Roles {
     Guest,
     Member,
