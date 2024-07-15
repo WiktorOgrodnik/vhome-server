@@ -9,7 +9,7 @@ pub struct ResponseTask {
     pub title: String,
     pub content: String,
     pub completed: bool,
-    pub completed_time: Option<DateTimeWithTimeZone>,
+    //pub completed_time: Option<DateTimeWithTimeZone>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -26,7 +26,7 @@ impl From<TaskModel> for ResponseTask {
             title: value.title,
             content: value.content,
             completed: value.completed,
-            completed_time: value.completed_time,
+            //      completed_time: value.completed_time,
         }
     }
 }
