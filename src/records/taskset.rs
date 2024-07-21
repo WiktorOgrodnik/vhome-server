@@ -7,6 +7,11 @@ pub struct ResponseTaskSet {
     pub name: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct InsertTaskset {
+    pub name: String,
+}
+
 impl From<TaskSetModel> for ResponseTaskSet {
     fn from(value: TaskSetModel) -> Self {
         ResponseTaskSet {

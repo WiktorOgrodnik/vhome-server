@@ -23,6 +23,7 @@ use crate::{
             set_task_completed::{set_completed, set_uncompleted},
         },
         taskset::{
+            add_taskset::add_taskset, delete_taskset::delete_taskset,
             get_all_group_tasksets::all as get_all_group_tasksets,
             get_one_taskset::one as get_one_taskset,
         },
@@ -33,8 +34,10 @@ use crate::{
 
 pub fn init_router(appstate: AppState) -> Router {
     Router::new()
+        .route("/taskset/:taskset_id", get(get_one_taskset))
+        .route("/taskset/:taskset_id", delete(delete_taskset))
         .route("/tasksets", get(get_all_group_tasksets))
-        .route("/tasksets/:taskset_id", get(get_one_taskset))
+        .route("/tasksets", post(add_taskset))
         .route("/task/:task_id", get(get_task))
         .route("/task/:task_id", delete(delete_task))
         .route("/task/:task_id/completed", put(set_completed))

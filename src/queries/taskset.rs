@@ -1,7 +1,14 @@
 use axum::http::StatusCode;
-use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, IntoActiveModel,
+    QueryFilter, Set,
+};
 
-use crate::database::taskset::{self, Entity as TaskSet, Model as TaskSetModel};
+use crate::{
+    database::task::{self, Entity as Task},
+    database::taskset::{self, Entity as TaskSet, Model as TaskSetModel},
+    records::taskset::InsertTaskset,
+};
 
 pub async fn has_permission(
     db: &DatabaseConnection,
@@ -55,4 +62,51 @@ pub async fn get_taskset(
         Some(taskset) => Ok(taskset),
         None => Err(StatusCode::NOT_FOUND),
     }
+}
+
+pub async fn create_taskset(
+    db: &DatabaseConnection,
+    taskset: InsertTaskset,
+    group_id: i32,
+) -> Result<TaskSetModel, StatusCode> {
+    let taskset = taskset::ActiveModel {
+        name: Set(taskset.name),
+        vgroup_id: Set(group_id),
+        ..Default::default()
+    };
+
+    save_active_taskset(db, taskset).await
+}
+
+pub async fn save_active_taskset(
+    db: &DatabaseConnection,
+    taskset: taskset::ActiveModel,
+) -> Result<TaskSetModel, StatusCode> {
+    taskset
+        .save(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .try_into()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+}
+
+pub async fn delete_taskset(
+    db: &DatabaseConnection,
+    taskset_id: i32,
+    group_id: i32,
+) -> Result<sea_orm::DeleteResult, StatusCode> {
+    let taskset = get_taskset(db, taskset_id, group_id)
+        .await?
+        .into_active_model();
+
+    TaskSet::delete(taskset)
+        .exec(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Task::delete_many()
+        .filter(task::Column::TasksetId.eq(taskset_id))
+        .exec(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
