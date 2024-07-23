@@ -10,6 +10,7 @@ use crate::{
         requires_authentication::requires_authentication, requires_group::requires_group,
     },
     routes::{
+        device::{get_devices::get_devices, get_thermometer::get_thermometer},
         greet::default as greet,
         group::{
             get_groups::get_groups,
@@ -34,6 +35,8 @@ use crate::{
 
 pub fn init_router(appstate: AppState) -> Router {
     Router::new()
+        .route("/thermometer/:device_id", get(get_thermometer))
+        .route("/devices", get(get_devices))
         .route("/taskset/:taskset_id", get(get_one_taskset))
         .route("/taskset/:taskset_id", delete(delete_taskset))
         .route("/tasksets", get(get_all_group_tasksets))
