@@ -3,9 +3,11 @@ use bcrypt::verify;
 use sea_orm::DatabaseConnection;
 
 use crate::{
-    queries::token::save_token,
-    queries::user as queries,
-    records::user::{RequestUser, ResponseUser},
+    queries::{token::save_token, user as queries},
+    records::{
+        token::TokenType,
+        user::{RequestUser, ResponseUser},
+    },
     state::SecretWrapper,
     utilities::token::create_token,
 };
@@ -23,8 +25,8 @@ pub async fn login(
         return Err(StatusCode::UNAUTHORIZED);
     }
 
-    let token = create_token(&secret.0, user.id, None)?;
-    let token = save_token(&db, user.id, &token).await?;
+    let token = create_token(&secret.0, user.id, TokenType::Normal, None)?;
+    let token = save_token(&db, user.id, &token, TokenType::Normal).await?;
 
     let response = ResponseUser {
         id: user.id,

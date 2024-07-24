@@ -5,7 +5,10 @@ use sea_orm::DatabaseConnection;
 
 use crate::queries::group as queries;
 use crate::queries::token::{delete_token, save_token};
-use crate::records::user::{ResponseUser, UserExtension};
+use crate::records::{
+    token::TokenType,
+    user::{ResponseUser, UserExtension},
+};
 use crate::state::SecretWrapper;
 use crate::utilities::token::create_token;
 
@@ -18,8 +21,8 @@ pub async fn select_group(
     let _ = queries::get_group(&db, user.id, group_id).await?;
     let _ = delete_token(&db, user.id, &user.token).await?;
 
-    let token = create_token(&secret.0, user.id, Some(group_id))?;
-    let token = save_token(&db, user.id, &token).await?;
+    let token = create_token(&secret.0, user.id, TokenType::Normal, Some(group_id))?;
+    let token = save_token(&db, user.id, &token, TokenType::Normal).await?;
 
     let response = ResponseUser {
         id: user.id,
@@ -37,8 +40,8 @@ pub async fn unselect_group(
 ) -> Result<Json<ResponseUser>, StatusCode> {
     let _ = delete_token(&db, user.id, &user.token).await?;
 
-    let token = create_token(&secret.0, user.id, None)?;
-    let token = save_token(&db, user.id, &token).await?;
+    let token = create_token(&secret.0, user.id, TokenType::Normal, None)?;
+    let token = save_token(&db, user.id, &token, TokenType::Normal).await?;
 
     let response = ResponseUser {
         id: user.id,

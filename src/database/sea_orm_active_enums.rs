@@ -20,3 +20,11 @@ pub enum RoleType {
     #[sea_orm(string_value = "member")]
     Member,
 }
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "token_type")]
+pub enum TokenType {
+    #[sea_orm(string_value = "device")]
+    Device,
+    #[sea_orm(string_value = "normal")]
+    Normal,
+}

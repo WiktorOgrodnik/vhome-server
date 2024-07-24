@@ -11,6 +11,9 @@ pub struct Model {
     pub vgroup_id: i32,
     pub name: String,
     pub dev_t: DeviceType,
+    #[sea_orm(column_type = "Text")]
+    pub token: String,
+    pub initialized: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -31,3 +31,22 @@ pub async fn get_thermometer(
 
     Ok(thermometer)
 }
+
+pub async fn get_thermometer_by_token(
+    db: &DatabaseConnection,
+    token: &str,
+) -> Result<ThermometerModel, StatusCode> {
+    Ok(Device::find()
+        .filter(device::Column::Token.eq(token))
+        .find_with_related(Thermometer)
+        .all(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .first()
+        .ok_or(StatusCode::NOT_FOUND)?
+        .clone()
+        .1
+        .first()
+        .ok_or(StatusCode::NOT_FOUND)?
+        .clone())
+}

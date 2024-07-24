@@ -1,7 +1,7 @@
 use axum::{
     middleware,
     response::Redirect,
-    routing::{delete, get, post, put},
+    routing::{delete, get, patch, post, put},
     Router,
 };
 
@@ -10,7 +10,13 @@ use crate::{
         requires_authentication::requires_authentication, requires_group::requires_group,
     },
     routes::{
-        device::{get_devices::get_devices, get_thermometer::get_thermometer},
+        device::{
+            add_device::add_device,
+            get_devices::get_devices,
+            thermometer::{
+                get_thermometer::get_thermometer, update_thermometer::update_thermometer,
+            },
+        },
         greet::default as greet,
         group::{
             get_groups::get_groups,
@@ -37,6 +43,7 @@ pub fn init_router(appstate: AppState) -> Router {
     Router::new()
         .route("/thermometer/:device_id", get(get_thermometer))
         .route("/devices", get(get_devices))
+        .route("/devices", post(add_device))
         .route("/taskset/:taskset_id", get(get_one_taskset))
         .route("/taskset/:taskset_id", delete(delete_taskset))
         .route("/tasksets", get(get_all_group_tasksets))
@@ -59,6 +66,7 @@ pub fn init_router(appstate: AppState) -> Router {
             appstate.clone(),
             requires_authentication,
         ))
+        .route("/thermometer", patch(update_thermometer))
         .route("/login", post(login))
         .route("/", get(|| async { Redirect::permanent("/home") }))
         .route("/home", get(greet))

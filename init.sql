@@ -9,11 +9,6 @@ CREATE TABLE IF NOT EXISTS taskset (
   name VARCHAR NOT NULL
 );
 
-CREATE TYPE role_type AS ENUM (
-  'guest',
-  'member',
-  'admin'
-);
 
 CREATE TABLE IF NOT EXISTS vuser (
   id serial PRIMARY KEY,
@@ -21,10 +16,22 @@ CREATE TABLE IF NOT EXISTS vuser (
   passwd VARCHAR NOT NULL
 );
 
+CREATE TYPE token_type AS ENUM (
+  'normal',
+  'device'
+);
+
 CREATE TABLE IF NOT EXISTS tokens (
   vuser_id integer NOT NULL REFERENCES vuser(id),
   token TEXT NOT NULL,
+  token_t token_type NOT NULL,
   PRIMARY KEY (vuser_id, token)
+);
+
+CREATE TYPE role_type AS ENUM (
+  'guest',
+  'member',
+  'admin'
 );
 
 CREATE TABLE IF NOT EXISTS user_groups (
@@ -59,13 +66,15 @@ CREATE TABLE IF NOT EXISTS device (
   id serial PRIMARY KEY,
   vgroup_id INTEGER NOT NULL REFERENCES vgroup(id),
   name VARCHAR NOT NULL,
-  dev_t device_type NOT NULL
+  dev_t device_type NOT NULL,
+  token Text NOT NULL,
+  initialized BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS thermometer (
   device_id int PRIMARY KEY REFERENCES device(id),
-  last_temp real DEFAULT 0,
-  last_updated TIMESTAMPTZ DEFAULT NULL
+  last_temp real DEFAULT 0 NOT NULL,
+  last_updated TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 INSERT INTO vgroup (name)
@@ -106,8 +115,3 @@ INSERT INTO task_assign (task_id, user_assign, assign_time)
 VALUES
   ( 1, 1, NOW()),
   ( 1, 2, NOW());
-
-INSERT INTO device (vgroup_id, name, dev_t) VALUES
-  (1, 'Test thermometer', 'thermometer');
-
-INSERT INTO thermometer (device_id) VALUES (1);
