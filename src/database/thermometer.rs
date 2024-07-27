@@ -7,9 +7,11 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub device_id: i32,
-    #[sea_orm(column_type = "Float")]
-    pub last_temp: f32,
-    pub last_updated: Option<DateTimeWithTimeZone>,
+    #[sea_orm(column_type = "Float", nullable)]
+    pub last_temp: Option<f32>,
+    #[sea_orm(column_type = "Float", nullable)]
+    pub last_humidity: Option<f32>,
+    pub last_updated: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

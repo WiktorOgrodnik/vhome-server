@@ -4,14 +4,16 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct ResponseThermometer {
-    pub last_temp: f32,
-    pub last_updated: Option<DateTimeWithTimeZone>,
+    pub last_temp: Option<f32>,
+    pub last_humidity: Option<f32>,
+    pub last_updated: DateTimeWithTimeZone,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct UpdateThermometer {
     pub token: String,
-    pub current_temp: f32,
+    pub current_temp: Option<f32>,
+    pub current_humidity: Option<f32>,
 }
 
 impl From<ThermometerModel> for ResponseThermometer {
@@ -19,6 +21,7 @@ impl From<ThermometerModel> for ResponseThermometer {
         ResponseThermometer {
             last_temp: value.last_temp,
             last_updated: value.last_updated,
+            last_humidity: value.last_humidity,
         }
     }
 }

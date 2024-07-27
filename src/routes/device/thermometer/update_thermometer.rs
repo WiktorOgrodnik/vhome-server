@@ -40,7 +40,8 @@ pub async fn update_thermometer(
     let thermometer_active = thermometer::ActiveModel {
         device_id: Unchanged(device.id),
         last_temp: Set(data.current_temp),
-        last_updated: Set(Some(Utc::now().into())),
+        last_humidity: Set(data.current_humidity),
+        last_updated: Set(Utc::now().into()),
     };
 
     let device_active = device::ActiveModel {

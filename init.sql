@@ -73,7 +73,8 @@ CREATE TABLE IF NOT EXISTS device (
 
 CREATE TABLE IF NOT EXISTS thermometer (
   device_id int PRIMARY KEY REFERENCES device(id),
-  last_temp real DEFAULT 0 NOT NULL,
+  last_temp real,
+  last_humidity real,
   last_updated TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 

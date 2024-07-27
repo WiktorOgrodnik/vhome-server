@@ -14,4 +14,4 @@ readonly COMPOSE_PATH=./docker-compose.yml
 
 cargo build --release --target=${TARGET_ARCH}
 rsync ${SOURCE_PATH} ${COMPOSE_PATH} ${DATABASE_PATH} ${TARGET_HOST}:${TARGET_PATH}
-ssh -t ${TARGET_HOST} "cd ${TARGET_PATH} && docker compose up"
+ssh -t ${TARGET_HOST} sudo systemctl restart vhome.service
