@@ -13,7 +13,9 @@ CREATE TABLE IF NOT EXISTS taskset (
 CREATE TABLE IF NOT EXISTS vuser (
   id serial PRIMARY KEY,
   login VARCHAR NOT NULL,
-  passwd VARCHAR NOT NULL
+  passwd VARCHAR NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL,
+  picutre bytea NOT NULL
 );
 
 CREATE TYPE token_type AS ENUM (
@@ -89,15 +91,20 @@ VALUES
   ( 1, 'Party members' ),
   ( 2, 'Shopping list' );
 
-INSERT INTO vuser (login, passwd)
+INSERT INTO vuser (login, passwd, created_at, picutre)
 VALUES
-  ( 'user1', '$2b$12$iLmS6/.s.PrXYuSAZr30LOlUiu1hmQqZ9YidPWMXLJk1tLdoUVg9a' ),
-  ( 'user2', '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq' );
+  ( 'Wiktor',  '$2b$12$iLmS6/.s.PrXYuSAZr30LOlUiu1hmQqZ9YidPWMXLJk1tLdoUVg9a', NOW(), pg_read_binary_file('/var/lib/postgresql/def_images/wiktor_profile.png') ),
+  ( 'Michał',  '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq', NOW(), pg_read_binary_file('/var/lib/postgresql/def_images/michal_profile.png') ),
+  ( 'Magda',   '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq', NOW(), pg_read_binary_file('/var/lib/postgresql/def_images/magda_profile.png') ),
+  ( 'Krzysiu', '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq', NOW(), pg_read_binary_file('/var/lib/postgresql/def_images/krzysiu_profile.png') );
 
 INSERT INTO user_groups (vuser_id, vgroup_id, role)
 VALUES
   ( 1, 1, 'member' ),
-  ( 2, 2, 'member' ); 
+  ( 2, 2, 'member' ), 
+  ( 2, 1, 'member' ),
+  ( 3, 1, 'member' ),
+  ( 4, 1, 'member' );
 
 INSERT INTO task (title, content, taskset_id, completed)
 VALUES
@@ -115,4 +122,5 @@ VALUES
 INSERT INTO task_assign (task_id, user_assign, assign_time)
 VALUES
   ( 1, 1, NOW()),
-  ( 1, 2, NOW());
+  ( 1, 2, NOW()),
+  ( 2, 4, NOW());

@@ -40,7 +40,7 @@ pub async fn get_group(
             .next()
             .ok_or(StatusCode::NOT_FOUND)?,
     )
-    .filter(|(_, users)| users.iter().all(|user| user.id == user_id))
+    .filter(|(_, users)| users.iter().any(|user| user.id == user_id))
     .ok_or(StatusCode::FORBIDDEN)?
     .0;
 

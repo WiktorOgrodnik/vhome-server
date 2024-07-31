@@ -9,6 +9,9 @@ pub struct Model {
     pub id: i32,
     pub login: String,
     pub passwd: String,
+    pub created_at: DateTimeWithTimeZone,
+    #[sea_orm(column_type = "Binary(BlobSize::Blob(None))")]
+    pub picutre: Vec<u8>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -2,12 +2,13 @@ use axum::http::StatusCode;
 use chrono::Utc;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, IntoActiveModel,
-    QueryFilter, Set, TryIntoModel,
+    ModelTrait, QueryFilter, Set, TryIntoModel,
 };
 
 use crate::{
     database::{
         task::{self, Entity as Task, Model as TaskModel},
+        task_assign::{Entity as TaskAssign, Model as TaskAssignModel},
         taskset::Entity as TaskSet,
     },
     queries::taskset::has_permission,
@@ -70,6 +71,21 @@ pub async fn get_task(
     .0;
 
     Ok(task)
+}
+
+pub async fn get_task_assign(
+    db: &DatabaseConnection,
+    task_id: i32,
+    group_id: Option<i32>,
+) -> Result<Vec<TaskAssignModel>, StatusCode> {
+    let task_assign = get_task(db, task_id, group_id)
+        .await?
+        .find_related(TaskAssign)
+        .all(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(task_assign)
 }
 
 pub async fn create_task(

@@ -26,6 +26,7 @@ use crate::{
             add_task::add_task,
             delete_task::delete_task,
             get_task::one as get_task,
+            get_task_assign::get_task_assign,
             get_tasks::all as get_tasks,
             set_task_completed::{set_completed, set_uncompleted},
         },
@@ -34,7 +35,10 @@ use crate::{
             get_all_group_tasksets::all as get_all_group_tasksets,
             get_one_taskset::one as get_one_taskset,
         },
-        user::{login::login, logout::logout},
+        user::{
+            get_group_users::get_group_users, get_user_picture::get_user_picture, login::login,
+            logout::logout,
+        },
     },
     state::AppState,
 };
@@ -50,10 +54,12 @@ pub fn init_router(appstate: AppState) -> Router {
         .route("/tasksets", post(add_taskset))
         .route("/task/:task_id", get(get_task))
         .route("/task/:task_id", delete(delete_task))
+        .route("/task/:task_id/assign", get(get_task_assign))
         .route("/task/:task_id/completed", put(set_completed))
         .route("/task/:task_id/uncompleted", put(set_uncompleted))
         .route("/tasks", post(add_task))
         .route("/tasks/:taskset_id", get(get_tasks))
+        .route("/users", get(get_group_users))
         .route_layer(middleware::from_fn_with_state(
             appstate.clone(),
             requires_group,
@@ -66,6 +72,7 @@ pub fn init_router(appstate: AppState) -> Router {
             appstate.clone(),
             requires_authentication,
         ))
+        .route("/user/:user_id/picture", get(get_user_picture))
         .route("/thermometer", patch(update_thermometer))
         .route("/login", post(login))
         .route("/", get(|| async { Redirect::permanent("/home") }))

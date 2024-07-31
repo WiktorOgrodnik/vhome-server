@@ -1,7 +1,6 @@
-// use sea_orm::prelude::DateTimeWithTimeZone;
 use serde::{Deserialize, Serialize};
 
-use crate::database::task::Model as TaskModel;
+use crate::database::{task::Model as TaskModel, task_assign::Model as TaskAssignModel};
 
 #[derive(Serialize, Deserialize)]
 pub struct ResponseTask {
@@ -10,6 +9,12 @@ pub struct ResponseTask {
     pub content: String,
     pub completed: bool,
     pub taskset_id: i32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ResponseTaskAssign {
+    pub id: i32,
+    pub users_id: Vec<i32>,
 }
 
 #[derive(Serialize, Deserialize)]
