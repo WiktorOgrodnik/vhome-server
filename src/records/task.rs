@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::database::{task::Model as TaskModel, task_assign::Model as TaskAssignModel};
+use crate::database::task::Model as TaskModel;
 
 #[derive(Serialize, Deserialize)]
 pub struct ResponseTask {

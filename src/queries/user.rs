@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::database::{
-    vgroup::{self, Entity as Group, Model as GroupModel},
+    vgroup::{self, Entity as Group},
     vuser::{self, Entity as User, Model as UserModel},
 };
 

@@ -101,7 +101,7 @@ VALUES
 INSERT INTO user_groups (vuser_id, vgroup_id, role)
 VALUES
   ( 1, 1, 'member' ),
-  ( 2, 2, 'member' ), 
+  ( 2, 2, 'member' ),
   ( 2, 1, 'member' ),
   ( 3, 1, 'member' ),
   ( 4, 1, 'member' );

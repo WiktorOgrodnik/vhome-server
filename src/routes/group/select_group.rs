@@ -6,10 +6,7 @@ use sea_orm::DatabaseConnection;
 use crate::queries::group as queries;
 use crate::queries::token::{delete_token, save_token};
 use crate::records::user::ResponseUserLogin;
-use crate::records::{
-    token::TokenType,
-    user::{ResponseUser, UserExtension},
-};
+use crate::records::{token::TokenType, user::UserExtension};
 use crate::state::SecretWrapper;
 use crate::utilities::token::create_token;
 
