@@ -7,6 +7,11 @@ pub struct ResponseGroup {
     pub name: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct InsertGroup {
+    pub name: String,
+}
+
 impl From<GroupModel> for ResponseGroup {
     fn from(value: GroupModel) -> Self {
         ResponseGroup {

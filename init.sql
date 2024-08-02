@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS taskset (
   name VARCHAR NOT NULL
 );
 
-
 CREATE TABLE IF NOT EXISTS vuser (
   id serial PRIMARY KEY,
   login VARCHAR NOT NULL,
@@ -41,6 +40,13 @@ CREATE TABLE IF NOT EXISTS user_groups (
   vgroup_id integer NOT NULL REFERENCES vgroup(id),
   role role_type NOT NULL,
   PRIMARY KEY (vuser_id, vgroup_id)
+);
+
+CREATE TABLE IF NOT EXISTS groups_invitations (
+  id serial PRIMARY KEY,
+  vgroup_id integer NOT NULL REFERENCES vgroup(id),
+  invitation_code VARCHAR NOT NULL,
+  expiration_date TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS task (

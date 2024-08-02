@@ -16,7 +16,7 @@ pub async fn select_group(
     State(secret): State<SecretWrapper>,
     State(db): State<DatabaseConnection>,
 ) -> Result<Json<ResponseUserLogin>, StatusCode> {
-    let _ = queries::get_group(&db, user.id, group_id).await?;
+    let group = queries::get_group(&db, user.id, group_id).await?;
 
     let _ = delete_token(&db, user.id, &user.token).await?;
 
@@ -27,6 +27,7 @@ pub async fn select_group(
         id: user.id,
         username: user.username,
         token: token.token,
+        group: Some(group.name),
     };
 
     Ok(Json(response))
@@ -46,6 +47,7 @@ pub async fn unselect_group(
         id: user.id,
         username: user.username,
         token: token.token,
+        group: None,
     };
 
     Ok(Json(response))

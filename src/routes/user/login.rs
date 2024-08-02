@@ -32,6 +32,7 @@ pub async fn login(
         id: user.id,
         username: user.login,
         token: token.token,
+        group: None,
     };
 
     Ok(Json(response))

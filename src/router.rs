@@ -19,7 +19,11 @@ use crate::{
         },
         greet::default as greet,
         group::{
+            accept_invitation::accept_invitation,
+            add_group::add_group,
+            generate_group_invitation::generate_group_invitation,
             get_groups::get_groups,
+            leave_group::leave_group,
             select_group::{select_group, unselect_group},
         },
         task::{
@@ -65,10 +69,17 @@ pub fn init_router(appstate: AppState) -> Router {
         .route("/tasks", post(add_task))
         .route("/tasks/:taskset_id", get(get_tasks))
         .route("/users", get(get_group_users))
+        .route(
+            "/group/generate_invitation",
+            post(generate_group_invitation),
+        )
+        .route("/group/leave", post(leave_group))
         .route_layer(middleware::from_fn_with_state(
             appstate.clone(),
             requires_group,
         ))
+        .route("/groups", post(add_group))
+        .route("/group/accept", post(accept_invitation))
         .route("/group/select/:group_id", get(select_group))
         .route("/group/unselect", get(unselect_group))
         .route("/groups", get(get_groups))

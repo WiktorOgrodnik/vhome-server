@@ -13,6 +13,7 @@ pub struct ResponseUserLogin {
     pub id: i32,
     pub username: String,
     pub token: String,
+    pub group: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
