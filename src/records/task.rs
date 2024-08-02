@@ -24,6 +24,12 @@ pub struct InsertTask {
     pub taskset_id: i32,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct EditTask {
+    pub title: String,
+    pub content: String,
+}
+
 impl From<TaskModel> for ResponseTask {
     fn from(value: TaskModel) -> Self {
         ResponseTask {
