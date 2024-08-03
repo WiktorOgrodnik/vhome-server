@@ -42,6 +42,7 @@ use crate::{
             get_one_taskset::one as get_one_taskset,
         },
         user::{
+            add_user_picture::add_user_picture, create_user::create_user,
             get_group_users::get_group_users, get_user_picture::get_user_picture, login::login,
             logout::logout,
         },
@@ -78,6 +79,7 @@ pub fn init_router(appstate: AppState) -> Router {
             appstate.clone(),
             requires_group,
         ))
+        .route("/user/picture", post(add_user_picture))
         .route("/groups", post(add_group))
         .route("/group/accept", post(accept_invitation))
         .route("/group/select/:group_id", get(select_group))
@@ -91,6 +93,7 @@ pub fn init_router(appstate: AppState) -> Router {
         .route("/user/:user_id/picture", get(get_user_picture))
         .route("/thermometer", patch(update_thermometer))
         .route("/login", post(login))
+        .route("/register", post(create_user))
         .route("/", get(|| async { Redirect::permanent("/home") }))
         .route("/home", get(greet))
         .with_state(appstate)

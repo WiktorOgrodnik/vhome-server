@@ -85,3 +85,48 @@ CREATE TABLE IF NOT EXISTS thermometer (
   last_humidity real,
   last_updated TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
+
+INSERT INTO vgroup (name)
+VALUES
+  ( 'Friends' ),
+  ( 'Family' );
+
+INSERT INTO taskset (vgroup_id, name)
+VALUES
+  ( 1, 'Places to visit' ),
+  ( 1, 'Party members' ),
+  ( 2, 'Shopping list' );
+
+INSERT INTO vuser (login, passwd, created_at, picutre)
+VALUES
+  ( 'Wiktor',  '$2b$12$iLmS6/.s.PrXYuSAZr30LOlUiu1hmQqZ9YidPWMXLJk1tLdoUVg9a', NOW(), NULL ),
+  ( 'Michał',  '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq', NOW(), NULL ),
+  ( 'Magda',   '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq', NOW(), NULL ),
+  ( 'Krzysiu', '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq', NOW(), NULL );
+
+INSERT INTO user_groups (vuser_id, vgroup_id, role)
+VALUES
+  ( 1, 1, 'member' ),
+  ( 2, 2, 'member' ),
+  ( 2, 1, 'member' ),
+  ( 3, 1, 'member' ),
+  ( 4, 1, 'member' );
+
+INSERT INTO task (title, content, taskset_id, completed)
+VALUES
+  ( 'Pętla Kowale', 'Odwiedzić tę niesamowitą pętlę tramwajową', 1, false),
+  ( 'Kładka Muchobór', 'Nowa kładka, a jeszcze tam nie byłem', 1, false),
+  ( 'Park Tołpy', 'Po prostu park', 1, true ),
+  ( 'Antoni Suligowski', '', 2, false ),
+  ( 'Jacek Arbaz', '', 2, false ),
+  ( 'Bartek Młotek', 'Przynieś ciastka', 2, false ),
+  ( 'Tosia Nowak', 'Nocuje!', 2, true ),
+  ( 'Masło z solą', 'Lixdark', 3, true ),
+  ( 'Łosoś', 'Do ogłupiania miast', 3, true ),
+  ( 'Chlebek', 'Po prostu', 3, false);
+
+INSERT INTO task_assign (task_id, user_assign, assign_time)
+VALUES
+  ( 1, 1, NOW()),
+  ( 1, 2, NOW()),
+  ( 2, 4, NOW());

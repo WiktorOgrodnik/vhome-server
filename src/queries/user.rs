@@ -47,6 +47,9 @@ pub async fn get_users(
         .collect::<Vec<_>>())
 }
 
-pub async fn get_user_image(db: &DatabaseConnection, user_id: i32) -> Result<Vec<u8>, StatusCode> {
+pub async fn get_user_image(
+    db: &DatabaseConnection,
+    user_id: i32,
+) -> Result<Option<Vec<u8>>, StatusCode> {
     Ok(find_by_id(db, user_id).await?.picutre)
 }

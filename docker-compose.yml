@@ -2,7 +2,6 @@ services:
   database:
     image: postgres:16
     volumes:
-      - ./images:/var/lib/postgresql/def_images
       - db-data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:

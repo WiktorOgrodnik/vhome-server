@@ -10,7 +10,13 @@ pub async fn get_user_picture(
     Path(user_id): Path<i32>,
     State(db): State<DatabaseConnection>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let picture = queries::get_user_image(&db, user_id).await?;
+    let picture = queries::get_user_image(&db, user_id)
+        .await?
+        .ok_or(StatusCode::NO_CONTENT)?;
 
-    Ok((AppendHeaders([(CONTENT_TYPE, "image/png")]), picture))
+    if picture.is_empty() {
+        Err(StatusCode::NO_CONTENT)
+    } else {
+        Ok((AppendHeaders([(CONTENT_TYPE, "image/png")]), picture))
+    }
 }
