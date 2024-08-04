@@ -1,4 +1,3 @@
-// use sea_orm::prelude::DateTimeWithTimeZone;
 use serde::{Deserialize, Serialize};
 
 use crate::database::task::Model as TaskModel;
@@ -13,10 +12,22 @@ pub struct ResponseTask {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct ResponseTaskAssign {
+    pub id: i32,
+    pub users_id: Vec<i32>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct InsertTask {
     pub title: String,
     pub content: String,
     pub taskset_id: i32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct EditTask {
+    pub title: String,
+    pub content: String,
 }
 
 impl From<TaskModel> for ResponseTask {

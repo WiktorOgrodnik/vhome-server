@@ -2,16 +2,17 @@ use axum::http::StatusCode;
 use chrono::Utc;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, IntoActiveModel,
-    QueryFilter, Set, TryIntoModel,
+    ModelTrait, QueryFilter, Set, TryIntoModel,
 };
 
 use crate::{
     database::{
         task::{self, Entity as Task, Model as TaskModel},
+        task_assign::{self, Entity as TaskAssign, Model as TaskAssignModel},
         taskset::Entity as TaskSet,
     },
     queries::taskset::has_permission,
-    records::task::InsertTask,
+    records::task::{EditTask, InsertTask},
 };
 
 pub async fn get_all_tasks(
@@ -72,6 +73,21 @@ pub async fn get_task(
     Ok(task)
 }
 
+pub async fn get_task_assign(
+    db: &DatabaseConnection,
+    task_id: i32,
+    group_id: Option<i32>,
+) -> Result<Vec<TaskAssignModel>, StatusCode> {
+    let task_assign = get_task(db, task_id, group_id)
+        .await?
+        .find_related(TaskAssign)
+        .all(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(task_assign)
+}
+
 pub async fn create_task(
     db: &DatabaseConnection,
     task: InsertTask,
@@ -88,6 +104,24 @@ pub async fn create_task(
     };
 
     save_active_task(db, task).await
+}
+
+pub async fn patch_task(
+    db: &DatabaseConnection,
+    task_id: i32,
+    task: EditTask,
+    group_id: i32,
+) -> Result<(), StatusCode> {
+    let mut active_task: task::ActiveModel = get_task(db, task_id, Some(group_id))
+        .await?
+        .into_active_model();
+
+    active_task.title = Set(task.title);
+    active_task.content = Set(task.content);
+
+    let _ = save_active_task(db, active_task).await?;
+
+    Ok(())
 }
 
 pub async fn delete_task(
@@ -122,6 +156,63 @@ pub async fn change_completed(
     });
 
     let _ = save_active_task(db, task).await;
+
+    Ok(())
+}
+
+pub async fn set_assign(
+    db: &DatabaseConnection,
+    task_id: i32,
+    user_id: i32,
+    group_id: i32,
+) -> Result<(), StatusCode> {
+    let _ = get_task(db, task_id, Some(group_id)).await?;
+    let lookup_task_assign = TaskAssign::find()
+        .filter(
+            Condition::all()
+                .add(task_assign::Column::TaskId.eq(task_id))
+                .add(task_assign::Column::UserAssign.eq(user_id)),
+        )
+        .one(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .is_some();
+
+    if lookup_task_assign {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    let task_assign = task_assign::ActiveModel {
+        task_id: Set(task_id),
+        user_assign: Set(user_id),
+        assign_time: Set(Utc::now().into()),
+    };
+
+    task_assign
+        .insert(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(())
+}
+
+pub async fn set_unassign(
+    db: &DatabaseConnection,
+    task_id: i32,
+    user_id: i32,
+    group_id: i32,
+) -> Result<(), StatusCode> {
+    let _ = get_task(db, task_id, Some(group_id)).await?;
+    let _ = TaskAssign::find_by_id((task_id, user_id))
+        .one(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::BAD_REQUEST)?;
+
+    TaskAssign::delete_by_id((task_id, user_id))
+        .exec(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     Ok(())
 }

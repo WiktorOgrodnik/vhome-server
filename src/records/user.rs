@@ -1,4 +1,5 @@
 use crate::database::vuser::Model as UserModel;
+use sea_orm::prelude::DateTimeWithTimeZone;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -8,10 +9,18 @@ pub struct RequestUser {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct ResponseUser {
+pub struct ResponseUserLogin {
     pub id: i32,
     pub username: String,
     pub token: String,
+    pub group: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ResponseUser {
+    pub id: i32,
+    pub username: String,
+    pub created_at: DateTimeWithTimeZone,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -29,6 +38,16 @@ impl From<UserModel> for UserExtension {
             username: value.login,
             token: "".to_owned(),
             group_id: None,
+        }
+    }
+}
+
+impl From<UserModel> for ResponseUser {
+    fn from(value: UserModel) -> Self {
+        ResponseUser {
+            id: value.id,
+            username: value.login,
+            created_at: value.created_at,
         }
     }
 }
