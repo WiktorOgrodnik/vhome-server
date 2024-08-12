@@ -23,8 +23,6 @@ pub async fn pair_display(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    dbg!(body.clone());
-
     let mut pairing_code_row = PairingCodes::find_by_id(body)
         .one(&txn)
         .await
@@ -37,8 +35,6 @@ pub async fn pair_display(
     let token = save_token_txn(&txn, Some(user.id), &token, TokenType::Normal).await?;
 
     pairing_code_row.token_id = Set(Some(token.id));
-
-    dbg!(token.id);
 
     pairing_code_row
         .save(&txn)
