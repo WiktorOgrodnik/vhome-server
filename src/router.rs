@@ -17,6 +17,10 @@ use crate::{
                 get_thermometer::get_thermometer, update_thermometer::update_thermometer,
             },
         },
+        display::{
+            get_pairing_code::get_pairing_code, pair_display::pair_display,
+            use_pairing_code::use_pairing_code,
+        },
         greet::default as greet,
         group::{
             accept_invitation::accept_invitation,
@@ -75,6 +79,7 @@ pub fn init_router(appstate: AppState) -> Router {
             post(generate_group_invitation),
         )
         .route("/group/leave", post(leave_group))
+        .route("/display", post(pair_display))
         .route_layer(middleware::from_fn_with_state(
             appstate.clone(),
             requires_group,
@@ -90,6 +95,8 @@ pub fn init_router(appstate: AppState) -> Router {
             appstate.clone(),
             requires_authentication,
         ))
+        .route("/display/pairing_code", get(get_pairing_code))
+        .route("/display/pairing_code", post(use_pairing_code))
         .route("/user/:user_id/picture", get(get_user_picture))
         .route("/thermometer", patch(update_thermometer))
         .route("/login", post(login))

@@ -4,6 +4,7 @@ pub mod prelude;
 
 pub mod device;
 pub mod groups_invitations;
+pub mod pairing_codes;
 pub mod sea_orm_active_enums;
 pub mod task;
 pub mod task_assign;

@@ -6,7 +6,7 @@ use crate::records::token::{Claims, TokenType};
 
 pub fn create_token(
     secret: &str,
-    user_id: i32,
+    user_id: Option<i32>,
     token_t: TokenType,
     related_id: Option<i32>,
 ) -> Result<String, StatusCode> {

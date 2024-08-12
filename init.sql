@@ -19,14 +19,21 @@ CREATE TABLE IF NOT EXISTS vuser (
 
 CREATE TYPE token_type AS ENUM (
   'normal',
-  'device'
+  'device',
+  'display'
 );
 
 CREATE TABLE IF NOT EXISTS tokens (
-  vuser_id integer NOT NULL REFERENCES vuser(id),
+  id SERIAL PRIMARY KEY,
+  vuser_id integer REFERENCES vuser(id),
   token TEXT NOT NULL,
-  token_t token_type NOT NULL,
-  PRIMARY KEY (vuser_id, token)
+  token_t token_type NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS pairing_codes (
+  pairing_code VARCHAR PRIMARY KEY,
+  expiration_date TIMESTAMPTZ NOT NULL,
+  token_id int REFERENCES tokens(id)
 );
 
 CREATE TYPE role_type AS ENUM (

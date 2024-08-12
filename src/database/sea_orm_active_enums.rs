@@ -25,6 +25,8 @@ pub enum RoleType {
 pub enum TokenType {
     #[sea_orm(string_value = "device")]
     Device,
+    #[sea_orm(string_value = "display")]
+    Display,
     #[sea_orm(string_value = "normal")]
     Normal,
 }

@@ -50,13 +50,18 @@ pub async fn create_device(
         name: Set(device.name),
         dev_t: Set(DeviceType::from_str(&device.dev_t)?.into()),
         vgroup_id: Set(group_id),
-        token: Set(create_token(&secret, user_id, TokenType::Device, None)?),
+        token: Set(create_token(
+            &secret,
+            Some(user_id),
+            TokenType::Device,
+            None,
+        )?),
         initialized: Set(false),
         ..Default::default()
     };
 
     let device = save_active_device(db, device).await?;
-    save_token(db, user_id, &device.token, TokenType::Device).await?;
+    save_token(db, None, &device.token, TokenType::Device).await?;
     create_related_structure(db, &device).await?;
     Ok(device)
 }

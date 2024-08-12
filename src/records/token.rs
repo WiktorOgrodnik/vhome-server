@@ -6,6 +6,7 @@ use crate::database::sea_orm_active_enums::TokenType as DatabaseTokenType;
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub enum TokenType {
     Device,
+    Display,
     Normal,
 }
 
@@ -14,6 +15,7 @@ impl Into<DatabaseTokenType> for TokenType {
         match self {
             TokenType::Normal => DatabaseTokenType::Normal,
             TokenType::Device => DatabaseTokenType::Device,
+            TokenType::Display => DatabaseTokenType::Display,
         }
     }
 }
@@ -21,7 +23,7 @@ impl Into<DatabaseTokenType> for TokenType {
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
     pub exp: usize,
-    pub user_id: i32,
+    pub user_id: Option<i32>,
     pub token_t: TokenType,
     pub related_id: Option<i32>,
 }

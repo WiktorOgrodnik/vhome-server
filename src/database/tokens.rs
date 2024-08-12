@@ -6,15 +6,18 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "tokens")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub vuser_id: i32,
-    #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
+    #[sea_orm(primary_key)]
+    pub id: i32,
+    pub vuser_id: Option<i32>,
+    #[sea_orm(column_type = "Text")]
     pub token: String,
     pub token_t: TokenType,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(has_many = "super::pairing_codes::Entity")]
+    PairingCodes,
     #[sea_orm(
         belongs_to = "super::vuser::Entity",
         from = "Column::VuserId",
@@ -23,6 +26,12 @@ pub enum Relation {
         on_delete = "NoAction"
     )]
     Vuser,
+}
+
+impl Related<super::pairing_codes::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::PairingCodes.def()
+    }
 }
 
 impl Related<super::vuser::Entity> for Entity {

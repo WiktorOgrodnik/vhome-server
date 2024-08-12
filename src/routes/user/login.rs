@@ -25,8 +25,8 @@ pub async fn login(
         return Err(StatusCode::UNAUTHORIZED);
     }
 
-    let token = create_token(&secret.0, user.id, TokenType::Normal, None)?;
-    let token = save_token(&db, user.id, &token, TokenType::Normal).await?;
+    let token = create_token(&secret.0, Some(user.id), TokenType::Normal, None)?;
+    let token = save_token(&db, Some(user.id), &token, TokenType::Normal).await?;
 
     let response = ResponseUserLogin {
         id: user.id,

@@ -26,11 +26,11 @@ pub async fn accept_invitation(
 
     let token = create_token(
         &secret.0,
-        user.id,
+        Some(user.id),
         TokenType::Normal,
         Some(invitation.vgroup_id),
     )?;
-    let token = save_token(&db, user.id, &token, TokenType::Normal).await?;
+    let token = save_token(&db, Some(user.id), &token, TokenType::Normal).await?;
 
     let response = ResponseUserLogin {
         id: user.id,

@@ -2,6 +2,7 @@
 
 pub use super::device::Entity as Device;
 pub use super::groups_invitations::Entity as GroupsInvitations;
+pub use super::pairing_codes::Entity as PairingCodes;
 pub use super::task::Entity as Task;
 pub use super::task_assign::Entity as TaskAssign;
 pub use super::taskset::Entity as Taskset;
