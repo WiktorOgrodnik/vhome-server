@@ -27,7 +27,9 @@ pub fn create_token(
 
 pub fn validate_token(secret: &str, token: &str) -> Result<Claims, StatusCode> {
     let key = DecodingKey::from_secret(secret.as_bytes());
-    let validation = Validation::new(Algorithm::HS256);
+    let mut validation = Validation::new(Algorithm::HS256);
+    // temporary solution for persisten app login
+    validation.validate_exp = false;
     let token = decode::<Claims>(token, &key, &validation).map_err(|error| match error.kind() {
         jsonwebtoken::errors::ErrorKind::InvalidToken => StatusCode::BAD_REQUEST,
         jsonwebtoken::errors::ErrorKind::InvalidSignature
