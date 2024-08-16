@@ -122,11 +122,11 @@ pub async fn add_device_measurement(
         device_id: Set(device_id),
         measurement_label: Set(label.to_string()),
         measurement_value: Set(value),
-        ..Default::default()
+        measurement_time: Set(Utc::now().into()),
     };
 
     measurement
-        .save(txn)
+        .insert(txn)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .try_into_model()
