@@ -1,4 +1,5 @@
 use crate::database::vuser::Model as UserModel;
+use axum::http::StatusCode;
 use sea_orm::prelude::DateTimeWithTimeZone;
 use serde::{Deserialize, Serialize};
 
@@ -24,20 +25,67 @@ pub struct ResponseUser {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct UserExtension {
+pub enum UserExtension {
+    GroupUnselected(GroupUnselectedPayload),
+    GroupSelected(GroupSelectedPayload),
+}
+
+impl UserExtension {
+    pub fn force_group_selected(self) -> Result<GroupSelectedPayload, StatusCode> {
+        match self {
+            Self::GroupUnselected(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+            Self::GroupSelected(payload) => Ok(payload),
+        }
+    }
+
+    pub fn force_group_unselected(self) -> Result<GroupUnselectedPayload, StatusCode> {
+        match self {
+            Self::GroupUnselected(payload) => Ok(payload),
+            Self::GroupSelected(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct GroupUnselectedPayload {
     pub id: i32,
     pub username: String,
     pub token: String,
-    pub group_id: Option<i32>,
 }
 
-impl From<UserModel> for UserExtension {
+#[derive(Clone, Serialize, Deserialize)]
+pub struct GroupSelectedPayload {
+    pub id: i32,
+    pub group_id: i32,
+    pub username: String,
+    pub token: String,
+}
+
+impl From<UserModel> for GroupUnselectedPayload {
     fn from(value: UserModel) -> Self {
-        UserExtension {
+        GroupUnselectedPayload {
             id: value.id,
             username: value.login,
             token: "".to_owned(),
-            group_id: None,
+        }
+    }
+}
+
+impl From<GroupSelectedPayload> for GroupUnselectedPayload {
+    fn from(value: GroupSelectedPayload) -> Self {
+        GroupUnselectedPayload {
+            id: value.id,
+            username: value.username,
+            token: value.token,
+        }
+    }
+}
+
+impl From<UserExtension> for GroupUnselectedPayload {
+    fn from(value: UserExtension) -> Self {
+        match value {
+            UserExtension::GroupUnselected(payload) => payload,
+            UserExtension::GroupSelected(payload) => payload.into(),
         }
     }
 }

@@ -8,7 +8,7 @@ use axum::{
 };
 use sea_orm::DatabaseConnection;
 
-use crate::{queries::group::get_group, records::user::UserExtension};
+use crate::{queries::group::get_group_db, records::user::UserExtension};
 
 pub async fn requires_group(
     Extension(user): Extension<UserExtension>,
@@ -16,8 +16,11 @@ pub async fn requires_group(
     request: Request<Body>,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let group_id = user.group_id.ok_or(StatusCode::UNAUTHORIZED)?;
-    let _ = get_group(&db, user.id, group_id).await?;
-
-    Ok(next.run(request).await)
+    match user {
+        UserExtension::GroupUnselected(_) => Err(StatusCode::UNAUTHORIZED),
+        UserExtension::GroupSelected(payload) => {
+            let _ = get_group_db(&db, payload.id, payload.group_id).await?;
+            Ok(next.run(request).await)
+        }
+    }
 }

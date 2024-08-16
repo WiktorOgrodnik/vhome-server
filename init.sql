@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS task (
   content VARCHAR NOT NULL,
   completed BOOLEAN NOT NULL,
   taskset_id INTEGER NOT NULL REFERENCES taskset(id),
-  completed_time TIMESTAMPTZ DEFAULT NULL
+  last_update TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS task_assign (

@@ -11,7 +11,7 @@ pub struct Model {
     pub content: String,
     pub completed: bool,
     pub taskset_id: i32,
-    pub completed_time: Option<DateTimeWithTimeZone>,
+    pub last_update: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

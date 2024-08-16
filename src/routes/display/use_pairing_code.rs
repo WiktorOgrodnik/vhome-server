@@ -2,7 +2,7 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
 use chrono::Utc;
-use sea_orm::{DatabaseConnection, EntityTrait, ModelTrait, TransactionTrait};
+use sea_orm::{IsolationLevel,DatabaseConnection, EntityTrait, ModelTrait, TransactionTrait};
 
 use crate::database::pairing_codes::Entity as PairingCodes;
 use crate::database::tokens::Entity as Tokens;
@@ -17,7 +17,7 @@ pub async fn use_pairing_code(
     body: String,
 ) -> Result<Json<ResponseUserLogin>, StatusCode> {
     let txn = db
-        .begin()
+        .begin_with_config(Some(IsolationLevel::Serializable), None)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
@@ -52,8 +52,7 @@ pub async fn use_pairing_code(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::BAD_REQUEST)?;
 
-    let _ = txn
-        .commit()
+    txn.commit()
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

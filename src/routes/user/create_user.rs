@@ -1,19 +1,21 @@
 use axum::{extract::State, http::StatusCode, Json};
-use bcrypt::hash;
-use chrono::Utc;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, Set, TryIntoModel};
+use sea_orm::{IsolationLevel,DatabaseConnection, TransactionTrait};
 
 use crate::{
-    database::vuser,
     queries::user as queries,
     records::user::{RequestUser, ResponseUser},
 };
 
 pub async fn create_user(
     State(db): State<DatabaseConnection>,
-    Json(request_user): Json<RequestUser>,
+    Json(user): Json<RequestUser>,
 ) -> Result<(StatusCode, Json<ResponseUser>), StatusCode> {
-    let user_exists = queries::find_by_username(&db, request_user.username.clone())
+    let txn = db
+        .begin_with_config(Some(IsolationLevel::Serializable), None)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let user_exists = queries::get_user_by_username(&txn, &user.username)
         .await
         .is_ok();
 
@@ -21,18 +23,10 @@ pub async fn create_user(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    let active_user = vuser::ActiveModel {
-        login: Set(request_user.username),
-        passwd: Set(hash(request_user.password, 4).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?),
-        created_at: Set(Utc::now().into()),
-        ..Default::default()
-    };
+    let user = queries::add_user(&txn, user).await?;
 
-    let user = active_user
-        .save(&db)
+    txn.commit()
         .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .try_into_model()
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     let response = ResponseUser {

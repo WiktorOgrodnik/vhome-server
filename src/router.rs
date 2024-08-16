@@ -34,16 +34,15 @@ use crate::{
             add_task::add_task,
             delete_task::delete_task,
             edit_task::edit_task,
-            get_task::one as get_task,
-            get_task_assign::get_task_assign,
-            get_tasks::all as get_tasks,
+            get_task::get_task,
+            get_task_assigns::get_task_assigns,
+            get_tasks::get_tasks,
             set_task_assign::{set_assign, set_unassing},
             set_task_completed::{set_completed, set_uncompleted},
         },
         taskset::{
             add_taskset::add_taskset, delete_taskset::delete_taskset,
-            get_all_group_tasksets::all as get_all_group_tasksets,
-            get_one_taskset::one as get_one_taskset,
+            get_group_tasksets::get_group_tasksets, get_taskset::get_taskset,
         },
         user::{
             add_user_picture::add_user_picture, create_user::create_user,
@@ -59,14 +58,14 @@ pub fn init_router(appstate: AppState) -> Router {
         .route("/thermometer/:device_id", get(get_thermometer))
         .route("/devices", get(get_devices))
         .route("/devices", post(add_device))
-        .route("/taskset/:taskset_id", get(get_one_taskset))
+        .route("/taskset/:taskset_id", get(get_taskset))
         .route("/taskset/:taskset_id", delete(delete_taskset))
-        .route("/tasksets", get(get_all_group_tasksets))
+        .route("/tasksets", get(get_group_tasksets))
         .route("/tasksets", post(add_taskset))
         .route("/task/:task_id", get(get_task))
         .route("/task/:task_id", patch(edit_task))
         .route("/task/:task_id", delete(delete_task))
-        .route("/task/:task_id/assign", get(get_task_assign))
+        .route("/task/:task_id/assign", get(get_task_assigns))
         .route("/task/:task_id/assign/:user_id", put(set_assign))
         .route("/task/:task_id/unassign/:user_id", put(set_unassing))
         .route("/task/:task_id/completed", put(set_completed))
