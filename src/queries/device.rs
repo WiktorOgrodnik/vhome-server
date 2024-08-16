@@ -1,13 +1,17 @@
 use std::str::FromStr;
 
 use axum::http::StatusCode;
+use chrono::Utc;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Condition, DatabaseTransaction, EntityTrait, QueryFilter, Set,
     TryIntoModel, Unchanged,
 };
 
 use crate::{
-    database::device::{self, Entity as Device, Model as DeviceModel},
+    database::{
+        device::{self, Entity as Device, Model as DeviceModel},
+        device_measurements::{self, Model as DeviceMeasurementModel},
+    },
     queries::thermometer::add_thermometer,
     records::{
         device::{DeviceType, InsertDevice},
@@ -68,7 +72,7 @@ pub async fn add_device(
     };
 
     let device = save_active_device(txn, device).await?;
-    let _ = create_related_structure(txn, &device).await?;
+    create_related_structure(txn, &device).await?;
     Ok(device)
 }
 
@@ -79,10 +83,11 @@ pub async fn update_device(
     let device_active = device::ActiveModel {
         id: Unchanged(device_id),
         initialized: Set(true),
+        last_updated: Set(Utc::now().into()),
         ..Default::default()
     };
 
-    save_active_device(&txn, device_active).await
+    save_active_device(txn, device_active).await
 }
 
 pub async fn save_active_device(
@@ -105,4 +110,25 @@ pub async fn create_related_structure(
         DeviceType::Thermometer => add_thermometer(txn, device).await.map(|_| ()),
         DeviceType::Other => Err(StatusCode::BAD_REQUEST),
     }
+}
+
+pub async fn add_device_measurement(
+    txn: &DatabaseTransaction,
+    device_id: i32,
+    label: &str,
+    value: f32,
+) -> Result<DeviceMeasurementModel, StatusCode> {
+    let measurement = device_measurements::ActiveModel {
+        device_id: Set(device_id),
+        measurement_label: Set(label.to_string()),
+        measurement_value: Set(value),
+        ..Default::default()
+    };
+
+    measurement
+        .save(txn)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .try_into_model()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }

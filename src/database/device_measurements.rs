@@ -3,14 +3,15 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
-#[sea_orm(table_name = "thermometer")]
+#[sea_orm(table_name = "device_measurements")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub device_id: i32,
-    #[sea_orm(column_type = "Float", nullable)]
-    pub last_temp: Option<f32>,
-    #[sea_orm(column_type = "Float", nullable)]
-    pub last_humidity: Option<f32>,
+    pub measurement_label: String,
+    #[sea_orm(column_type = "Float")]
+    pub measurement_value: f32,
+    #[sea_orm(primary_key, auto_increment = false)]
+    pub measurement_time: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

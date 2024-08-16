@@ -1,6 +1,6 @@
 use axum::Json;
 use axum::{extract::State, http::StatusCode};
-use sea_orm::{IsolationLevel,DatabaseConnection, TransactionTrait};
+use sea_orm::{DatabaseConnection, IsolationLevel, TransactionTrait};
 
 use crate::{
     queries::{device as device_queries, thermometer as queries, token::get_device_token},
@@ -36,6 +36,15 @@ pub async fn update_thermometer(
 
     let _ = device_queries::update_device(&txn, device.id).await?;
     let _ = queries::patch_thermometer(&txn, device.id, data).await?;
+
+    if let Some(last_temp) = thermometer.last_temp {
+        device_queries::add_device_measurement(&txn, device.id, "last_temp", last_temp).await?;
+    }
+
+    if let Some(last_humidity) = thermometer.last_humidity {
+        device_queries::add_device_measurement(&txn, device.id, "last_humidity", last_humidity)
+            .await?;
+    }
 
     txn.commit()
         .await

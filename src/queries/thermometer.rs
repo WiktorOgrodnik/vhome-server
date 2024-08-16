@@ -1,5 +1,4 @@
 use axum::http::StatusCode;
-use chrono::Utc;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseTransaction, EntityTrait, QueryFilter, Set,
     TryIntoModel, Unchanged,
@@ -82,7 +81,6 @@ pub async fn patch_thermometer(
         device_id: Unchanged(device_id),
         last_temp: Set(data.current_temp),
         last_humidity: Set(data.current_humidity),
-        last_updated: Set(Utc::now().into()),
     };
 
     save_active_thermometer(txn, thermometer_active).await

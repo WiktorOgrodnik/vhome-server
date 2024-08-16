@@ -14,10 +14,13 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub token: String,
     pub initialized: bool,
+    pub last_updated: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(has_many = "super::device_measurements::Entity")]
+    DeviceMeasurements,
     #[sea_orm(has_one = "super::thermometer::Entity")]
     Thermometer,
     #[sea_orm(
@@ -28,6 +31,12 @@ pub enum Relation {
         on_delete = "NoAction"
     )]
     Vgroup,
+}
+
+impl Related<super::device_measurements::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::DeviceMeasurements.def()
+    }
 }
 
 impl Related<super::thermometer::Entity> for Entity {

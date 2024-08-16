@@ -3,6 +3,7 @@
 pub mod prelude;
 
 pub mod device;
+pub mod device_measurements;
 pub mod groups_invitations;
 pub mod pairing_codes;
 pub mod sea_orm_active_enums;

@@ -19,14 +19,21 @@ CREATE TABLE IF NOT EXISTS vuser (
 
 CREATE TYPE token_type AS ENUM (
   'normal',
-  'device'
+  'device',
+  'display'
 );
 
 CREATE TABLE IF NOT EXISTS tokens (
-  vuser_id integer NOT NULL REFERENCES vuser(id),
+  id SERIAL PRIMARY KEY,
+  vuser_id integer REFERENCES vuser(id),
   token TEXT NOT NULL,
-  token_t token_type NOT NULL,
-  PRIMARY KEY (vuser_id, token)
+  token_t token_type NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS pairing_codes (
+  pairing_code VARCHAR PRIMARY KEY,
+  expiration_date TIMESTAMPTZ NOT NULL,
+  token_id int REFERENCES tokens(id)
 );
 
 CREATE TYPE role_type AS ENUM (
@@ -55,7 +62,7 @@ CREATE TABLE IF NOT EXISTS task (
   content VARCHAR NOT NULL,
   completed BOOLEAN NOT NULL,
   taskset_id INTEGER NOT NULL REFERENCES taskset(id),
-  completed_time TIMESTAMPTZ DEFAULT NULL
+  last_update TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS task_assign (
@@ -76,14 +83,22 @@ CREATE TABLE IF NOT EXISTS device (
   name VARCHAR NOT NULL,
   dev_t device_type NOT NULL,
   token Text NOT NULL,
-  initialized BOOLEAN NOT NULL
+  initialized BOOLEAN NOT NULL,
+  last_updated TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS device_measurements (
+  device_id int REFERENCES device(id),
+  measurement_label VARCHAR NOT NULL,
+  measurement_value REAL NOT NULL,
+  measurement_time TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  PRIMARY KEY (device_id, measurement_time)
 );
 
 CREATE TABLE IF NOT EXISTS thermometer (
   device_id int PRIMARY KEY REFERENCES device(id),
   last_temp real,
-  last_humidity real,
-  last_updated TIMESTAMPTZ DEFAULT NOW() NOT NULL
+  last_humidity real
 );
 
 INSERT INTO vgroup (name)
@@ -99,10 +114,10 @@ VALUES
 
 INSERT INTO vuser (login, passwd, created_at, picutre)
 VALUES
-  ( 'Wiktor',  '$2b$12$iLmS6/.s.PrXYuSAZr30LOlUiu1hmQqZ9YidPWMXLJk1tLdoUVg9a', NOW(), NULL ),
-  ( 'Michał',  '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq', NOW(), NULL ),
-  ( 'Magda',   '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq', NOW(), NULL ),
-  ( 'Krzysiu', '$2b$12$SPTRcKQyxD91xbPmNjNRNuxZcivy3Go7oXW9TfG8JaR60hAhDq3Mq', NOW(), NULL );
+  ( 'Wiktor',  '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL ),
+  ( 'Michał',  '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL ),
+  ( 'Magda',   '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL ),
+  ( 'Krzysiu', '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL );
 
 INSERT INTO user_groups (vuser_id, vgroup_id, role)
 VALUES

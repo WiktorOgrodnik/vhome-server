@@ -83,12 +83,20 @@ CREATE TABLE IF NOT EXISTS device (
   name VARCHAR NOT NULL,
   dev_t device_type NOT NULL,
   token Text NOT NULL,
-  initialized BOOLEAN NOT NULL
+  initialized BOOLEAN NOT NULL,
+  last_updated TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS device_measurements (
+  device_id int REFERENCES device(id),
+  measurement_label VARCHAR NOT NULL,
+  measurement_value REAL NOT NULL,
+  measurement_time TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  PRIMARY KEY (device_id, measurement_time)
 );
 
 CREATE TABLE IF NOT EXISTS thermometer (
   device_id int PRIMARY KEY REFERENCES device(id),
   last_temp real,
-  last_humidity real,
-  last_updated TIMESTAMPTZ DEFAULT NOW() NOT NULL
+  last_humidity real
 );

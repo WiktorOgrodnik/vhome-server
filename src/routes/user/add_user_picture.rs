@@ -1,17 +1,19 @@
 use axum::body::Bytes;
 use axum::Extension;
 use axum::{extract::State, http::StatusCode};
-use sea_orm::{IsolationLevel,ActiveModelTrait, DatabaseConnection, IntoActiveModel, Set, TransactionTrait};
+use sea_orm::{
+    ActiveModelTrait, DatabaseConnection, IntoActiveModel, IsolationLevel, Set, TransactionTrait,
+};
 
 use crate::queries::user as queries;
-use crate::records::user::UserExtension;
+use crate::records::user::{GroupUnselectedPayload, UserExtension};
 
 pub async fn add_user_picture(
     Extension(user): Extension<UserExtension>,
     State(db): State<DatabaseConnection>,
     body: Bytes,
 ) -> Result<(), StatusCode> {
-    let user = user.force_group_selected()?;
+    let user: GroupUnselectedPayload = user.into();
 
     let txn = db
         .begin_with_config(Some(IsolationLevel::Serializable), None)
