@@ -13,6 +13,7 @@ use crate::{
         device::{
             add_device::add_device,
             get_devices::get_devices,
+            get_measurements::get_measurements,
             thermometer::{
                 get_thermometer::get_thermometer, update_thermometer::update_thermometer,
             },
@@ -58,6 +59,10 @@ pub fn init_router(appstate: AppState) -> Router {
         .route("/thermometer/:device_id", get(get_thermometer))
         .route("/devices", get(get_devices))
         .route("/devices", post(add_device))
+        .route(
+            "/measurements/:device_id/:time_range",
+            get(get_measurements),
+        )
         .route("/taskset/:taskset_id", get(get_taskset))
         .route("/taskset/:taskset_id", delete(delete_taskset))
         .route("/tasksets", get(get_group_tasksets))

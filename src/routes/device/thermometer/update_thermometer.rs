@@ -32,7 +32,7 @@ pub async fn update_thermometer(
         })?;
 
     let thermometer = queries::get_thermometer_by_token(&txn, &token_model.token).await?;
-    let device = device_queries::get_device(&txn, thermometer.device_id).await?;
+    let device = device_queries::get_device(&txn, thermometer.device_id, None).await?;
 
     let _ = device_queries::update_device(&txn, device.id).await?;
     let _ = queries::patch_thermometer(&txn, device.id, data).await?;

@@ -3,14 +3,14 @@ use std::str::FromStr;
 use axum::http::StatusCode;
 use chrono::Utc;
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, Condition, DatabaseTransaction, EntityTrait, QueryFilter, Set,
-    TryIntoModel, Unchanged,
+    prelude::DateTimeWithTimeZone, ActiveModelTrait, ColumnTrait, Condition, DatabaseTransaction,
+    EntityTrait, QueryFilter, Set, TryIntoModel, Unchanged,
 };
 
 use crate::{
     database::{
         device::{self, Entity as Device, Model as DeviceModel},
-        device_measurements::{self, Model as DeviceMeasurementModel},
+        device_measurements::{self, Entity as DeviceMeasurement, Model as DeviceMeasurementModel},
     },
     queries::thermometer::add_thermometer,
     records::{
@@ -23,8 +23,16 @@ use crate::{
 pub async fn get_device(
     txn: &DatabaseTransaction,
     device_id: i32,
+    group_id: Option<i32>,
 ) -> Result<DeviceModel, StatusCode> {
+    let condition = if let Some(id) = group_id {
+        Condition::all().add(device::Column::VgroupId.eq(id))
+    } else {
+        Condition::all()
+    };
+
     Device::find_by_id(device_id)
+        .filter(condition)
         .one(txn)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
@@ -46,6 +54,24 @@ pub async fn get_devices(
     Device::find()
         .filter(condition)
         .all(db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+}
+
+pub async fn get_measurements(
+    txn: &DatabaseTransaction,
+    device_id: i32,
+    time_from: DateTimeWithTimeZone,
+    time_to: DateTimeWithTimeZone,
+) -> Result<Vec<DeviceMeasurementModel>, StatusCode> {
+    DeviceMeasurement::find()
+        .filter(
+            Condition::all()
+                .add(device_measurements::Column::DeviceId.eq(device_id))
+                .add(device_measurements::Column::MeasurementTime.gte(time_from))
+                .add(device_measurements::Column::MeasurementTime.lte(time_to)),
+        )
+        .all(txn)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }

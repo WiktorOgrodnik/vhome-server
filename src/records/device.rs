@@ -1,7 +1,8 @@
 use std::str::FromStr;
 
 use crate::database::{
-    device::Model as DeviceModel, sea_orm_active_enums::DeviceType as DatabaseDeviceType,
+    device::Model as DeviceModel, device_measurements::Model as DeviceMeasurementModel,
+    sea_orm_active_enums::DeviceType as DatabaseDeviceType,
 };
 use axum::http::StatusCode;
 use sea_orm::{prelude::DateTimeWithTimeZone, ActiveEnum};
@@ -62,6 +63,22 @@ pub struct InsertDevice {
     pub dev_t: String,
 }
 
+#[derive(Serialize, Deserialize)]
+#[allow(non_camel_case_types)]
+pub enum MeasurementsTimeRange {
+    hour,
+    day,
+    week,
+    month,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ResponseMeasurement {
+    pub label: String,
+    pub value: f32,
+    pub time: DateTimeWithTimeZone,
+}
+
 impl From<DeviceModel> for ResponseDevice {
     fn from(value: DeviceModel) -> Self {
         ResponseDevice {
@@ -77,5 +94,15 @@ impl From<DeviceModel> for ResponseDevice {
 impl From<DeviceModel> for ResponseDeviceToken {
     fn from(value: DeviceModel) -> Self {
         ResponseDeviceToken { token: value.token }
+    }
+}
+
+impl From<DeviceMeasurementModel> for ResponseMeasurement {
+    fn from(value: DeviceMeasurementModel) -> Self {
+        ResponseMeasurement {
+            label: value.measurement_label,
+            value: value.measurement_value,
+            time: value.measurement_time,
+        }
     }
 }
