@@ -232,16 +232,14 @@ pub async fn patch_task(
     txn: &DatabaseTransaction,
     task: TaskModel,
     edited_task: EditTask,
-) -> Result<(), StatusCode> {
+) -> Result<TaskModel, StatusCode> {
     let mut active_task = task.into_active_model();
 
     active_task.title = Set(edited_task.title);
     active_task.content = Set(edited_task.content);
     active_task.last_update = Set(Utc::now().into());
 
-    let _ = save_active_task(txn, active_task).await?;
-
-    Ok(())
+    save_active_task(txn, active_task).await
 }
 
 pub async fn delete_task(

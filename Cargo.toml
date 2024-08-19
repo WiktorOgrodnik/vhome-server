@@ -5,19 +5,18 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = { version = "1.0.208", features = ["derive"] }
+serde = { version = "=1.0.208", features = ["derive"] }
 
-dotenvy = "0.15.7"
-dotenvy_macro = "0.15.7"
-bcrypt = "0.15.1"
+dotenvy = "=0.15.7"
+dotenvy_macro = "=0.15.7"
+bcrypt = "=0.15.1"
 
-axum = { version = "0.7.5", features = ["macros"] }
-tokio = { version = "1.39.2", features = ["macros", "rt-multi-thread"] }
-sea-orm = { version = "1.0.0", features = ["runtime-tokio-rustls", "sqlx-postgres"] }
-chrono = { version = "0.4.38", features = ["serde"] }
-strum = { version = "0.26.3" }
-jsonwebtoken = "9.3.0"
-uuid = { version = "1.10.0", features = ["fast-rng", "macro-diagnostics", "v4"] }
+axum = { version = "=0.7.5", features = ["macros"] }
+tokio = { version = "=1.39.2", features = ["macros", "rt-multi-thread"] }
+sea-orm = { version = "=1.0.0", features = ["runtime-tokio-rustls", "sqlx-postgres"] }
+chrono = { version = "=0.4.38", features = ["serde"] }
+jsonwebtoken = "=9.3.0"
+uuid = { version = "=1.10.0", features = ["fast-rng", "macro-diagnostics", "v4"] }
 
 [lib]
 name = "lib"

@@ -20,7 +20,7 @@ pub async fn edit_task(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     let task = queries::get_task(&txn, task_id, Some(user.group_id)).await?;
-    queries::patch_task(&txn, task, edited_task).await?;
+    let _ = queries::patch_task(&txn, task, edited_task).await?;
 
     txn.commit()
         .await

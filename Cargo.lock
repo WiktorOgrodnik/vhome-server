@@ -758,7 +758,6 @@ dependencies = [
  "jsonwebtoken",
  "sea-orm",
  "serde",
- "strum",
  "tokio",
  "uuid",
 ]
