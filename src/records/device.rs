@@ -64,6 +64,11 @@ pub struct InsertDevice {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct EditDevice {
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize)]
 #[allow(non_camel_case_types)]
 pub enum MeasurementsTimeRange {
     hour,

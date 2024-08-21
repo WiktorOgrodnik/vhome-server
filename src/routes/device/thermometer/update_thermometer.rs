@@ -1,5 +1,6 @@
 use axum::Json;
 use axum::{extract::State, http::StatusCode};
+use chrono::{Duration, Utc};
 use sea_orm::{DatabaseConnection, IsolationLevel, TransactionTrait};
 
 use crate::{
@@ -45,6 +46,13 @@ pub async fn update_thermometer(
         device_queries::add_device_measurement(&txn, device.id, "last_humidity", last_humidity)
             .await?;
     }
+
+    let _ = device_queries::delete_device_measurements(
+        &txn,
+        device.id,
+        Some((Utc::now() - Duration::days(30)).into()),
+    )
+    .await?;
 
     txn.commit()
         .await

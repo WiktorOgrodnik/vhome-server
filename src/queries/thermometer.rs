@@ -86,6 +86,16 @@ pub async fn patch_thermometer(
     save_active_thermometer(txn, thermometer_active).await
 }
 
+pub async fn delete_thermometer(
+    txn: &DatabaseTransaction,
+    thermometer_id: i32,
+) -> Result<sea_orm::DeleteResult, StatusCode> {
+    Thermometer::delete_by_id(thermometer_id)
+        .exec(txn)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+}
+
 pub async fn save_active_thermometer(
     txn: &DatabaseTransaction,
     thermometer: thermometer::ActiveModel,

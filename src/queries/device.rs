@@ -4,17 +4,18 @@ use axum::http::StatusCode;
 use chrono::Utc;
 use sea_orm::{
     prelude::DateTimeWithTimeZone, ActiveModelTrait, ColumnTrait, Condition, DatabaseTransaction,
-    EntityTrait, QueryFilter, Set, TryIntoModel, Unchanged,
+    EntityTrait, IntoActiveModel, ModelTrait, QueryFilter, Set, TryIntoModel, Unchanged,
 };
 
 use crate::{
     database::{
         device::{self, Entity as Device, Model as DeviceModel},
         device_measurements::{self, Entity as DeviceMeasurement, Model as DeviceMeasurementModel},
+        sea_orm_active_enums::DeviceType as DatabaseDeviceType,
     },
-    queries::thermometer::add_thermometer,
+    queries::thermometer::{add_thermometer, delete_thermometer},
     records::{
-        device::{DeviceType, InsertDevice},
+        device::{DeviceType, EditDevice, InsertDevice},
         token::TokenType,
     },
     utilities::token::create_token,
@@ -102,6 +103,18 @@ pub async fn add_device(
     Ok(device)
 }
 
+pub async fn patch_device(
+    txn: &DatabaseTransaction,
+    device: DeviceModel,
+    edited_device: EditDevice,
+) -> Result<DeviceModel, StatusCode> {
+    let mut active_device = device.into_active_model();
+
+    active_device.name = Set(edited_device.name);
+
+    save_active_device(txn, active_device).await
+}
+
 pub async fn update_device(
     txn: &DatabaseTransaction,
     device_id: i32,
@@ -114,6 +127,23 @@ pub async fn update_device(
     };
 
     save_active_device(txn, device_active).await
+}
+
+pub async fn delete_device(
+    txn: &DatabaseTransaction,
+    device: DeviceModel,
+) -> Result<sea_orm::DeleteResult, StatusCode> {
+    match device.dev_t {
+        DatabaseDeviceType::Thermometer => {
+            delete_thermometer(txn, device.id).await?;
+        }
+        _ => (),
+    };
+
+    device
+        .delete(txn)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
 
 pub async fn save_active_device(
@@ -156,5 +186,25 @@ pub async fn add_device_measurement(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .try_into_model()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+}
+
+pub async fn delete_device_measurements(
+    txn: &DatabaseTransaction,
+    device_id: i32,
+    older_then: Option<DateTimeWithTimeZone>,
+) -> Result<sea_orm::DeleteResult, StatusCode> {
+    let condition = if let Some(older_then) = older_then {
+        Condition::all()
+            .add(device_measurements::Column::DeviceId.eq(device_id))
+            .add(device_measurements::Column::MeasurementTime.lte(older_then))
+    } else {
+        Condition::all().add(device_measurements::Column::DeviceId.eq(device_id))
+    };
+
+    DeviceMeasurement::delete_many()
+        .filter(condition)
+        .exec(txn)
+        .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
