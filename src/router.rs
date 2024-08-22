@@ -44,7 +44,7 @@ use crate::{
             set_task_completed::{set_completed, set_uncompleted},
         },
         taskset::{
-            add_taskset::add_taskset, delete_taskset::delete_taskset,
+            add_taskset::add_taskset, delete_taskset::delete_taskset, edit_taskset::edit_taskset,
             get_group_tasksets::get_group_tasksets, get_taskset::get_taskset,
         },
         user::{
@@ -68,6 +68,7 @@ pub fn init_router(appstate: AppState) -> Router {
             get(get_measurements),
         )
         .route("/taskset/:taskset_id", get(get_taskset))
+        .route("/taskset/:taskset_id", patch(edit_taskset))
         .route("/taskset/:taskset_id", delete(delete_taskset))
         .route("/tasksets", get(get_group_tasksets))
         .route("/tasksets", post(add_taskset))

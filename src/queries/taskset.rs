@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, DatabaseTransaction, EntityTrait,
-    QueryFilter, Set,
+    IntoActiveModel, QueryFilter, Set,
 };
 
 use crate::{
@@ -113,6 +113,18 @@ pub async fn add_taskset(
     };
 
     save_active_taskset(txn, taskset).await
+}
+
+pub async fn patch_taskset(
+    txn: &DatabaseTransaction,
+    taskset: TaskSetModel,
+    edited_taskset: InsertTaskset,
+) -> Result<TaskSetModel, StatusCode> {
+    let mut active_taskset = taskset.into_active_model();
+
+    active_taskset.name = Set(edited_taskset.name);
+
+    save_active_taskset(txn, active_taskset).await
 }
 
 pub async fn save_active_taskset(
