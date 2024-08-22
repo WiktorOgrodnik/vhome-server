@@ -25,6 +25,17 @@ pub async fn get_token(
         .ok_or(StatusCode::BAD_REQUEST)
 }
 
+pub async fn get_token_by_id(
+    txn: &DatabaseTransaction,
+    token_id: i32,
+) -> Result<TokenModel, StatusCode> {
+    Token::find_by_id(token_id)
+        .one(txn)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::BAD_REQUEST)
+}
+
 pub async fn get_normal_token(
     txn: &DatabaseTransaction,
     user_id: i32,

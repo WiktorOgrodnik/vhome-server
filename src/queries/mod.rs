@@ -1,4 +1,5 @@
 pub mod device;
+pub mod display;
 pub mod group;
 pub mod task;
 pub mod taskset;

@@ -1,15 +1,14 @@
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
-use chrono::Utc;
-use sea_orm::{IsolationLevel,DatabaseConnection, EntityTrait, ModelTrait, TransactionTrait};
+use sea_orm::{DatabaseConnection, IsolationLevel, TransactionTrait};
 
-use crate::database::pairing_codes::Entity as PairingCodes;
-use crate::database::tokens::Entity as Tokens;
-use crate::database::vgroup::Entity as Group;
-use crate::records::user::ResponseUserLogin;
-use crate::state::SecretWrapper;
-use crate::utilities::token::validate_token;
+use crate::{
+    queries::{display as queries, group as group_queries, token as token_queries},
+    records::user::ResponseUserLogin,
+    state::SecretWrapper,
+    utilities::token::validate_token,
+};
 
 pub async fn use_pairing_code(
     State(secret): State<SecretWrapper>,
@@ -21,36 +20,21 @@ pub async fn use_pairing_code(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let pairing_code_row = PairingCodes::find_by_id(body)
-        .one(&txn)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .filter(|row| row.expiration_date > Utc::now())
-        .filter(|row| row.token_id.is_some())
-        .ok_or(StatusCode::BAD_REQUEST)?;
+    let pairing_code = queries::get_pairing_code(&txn, body, true).await?;
+    let token_id = pairing_code
+        .token_id
+        .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let token = Tokens::find_by_id(
-        pairing_code_row
-            .token_id
-            .expect("token id is required here"),
-    )
-    .one(&txn)
-    .await
-    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-    .ok_or(StatusCode::BAD_REQUEST)?;
+    let token = token_queries::get_token_by_id(&txn, token_id).await?;
 
     let claims = validate_token(&secret.0, &token.token).map_err(|_| StatusCode::UNAUTHORIZED)?;
+    let _ = queries::delete_pairing_code(&txn, pairing_code).await?;
 
-    let _ = pairing_code_row
-        .delete(&txn)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-
-    let group = Group::find_by_id(claims.related_id.unwrap())
-        .one(&txn)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::BAD_REQUEST)?;
+    let group = group_queries::get_group_by_id(
+        &txn,
+        claims.related_id.ok_or(StatusCode::INTERNAL_SERVER_ERROR)?,
+    )
+    .await?;
 
     txn.commit()
         .await

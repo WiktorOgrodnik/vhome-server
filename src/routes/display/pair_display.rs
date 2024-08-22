@@ -1,13 +1,10 @@
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Extension;
-use chrono::Utc;
-use sea_orm::{IsolationLevel,
-    ActiveModelTrait, DatabaseConnection, EntityTrait, IntoActiveModel, Set, TransactionTrait,
-};
+use sea_orm::{DatabaseConnection, IsolationLevel, TransactionTrait};
 
-use crate::database::pairing_codes::Entity as PairingCodes;
-use crate::queries::token::save_token;
+use crate::queries::display::set_pairing_code_token;
+use crate::queries::{display as queries, token::save_token};
 use crate::records::{token::TokenType, user::UserExtension};
 use crate::state::SecretWrapper;
 use crate::utilities::token::create_token;
@@ -25,13 +22,7 @@ pub async fn pair_display(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let mut pairing_code_row = PairingCodes::find_by_id(body)
-        .one(&txn)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .filter(|row| row.expiration_date >= Utc::now())
-        .ok_or(StatusCode::BAD_REQUEST)?
-        .into_active_model();
+    let pairing_code = queries::get_pairing_code(&txn, body, false).await?;
 
     let token = create_token(
         &secret.0,
@@ -41,13 +32,7 @@ pub async fn pair_display(
     )?;
 
     let token = save_token(&txn, Some(user.id), &token, TokenType::Normal).await?;
-
-    pairing_code_row.token_id = Set(Some(token.id));
-
-    pairing_code_row
-        .save(&txn)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let _ = set_pairing_code_token(&txn, pairing_code, token.id).await?;
 
     txn.commit()
         .await

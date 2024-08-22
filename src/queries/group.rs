@@ -62,6 +62,17 @@ pub async fn get_group_db(
     Ok(group)
 }
 
+pub async fn get_group_by_id(
+    txn: &DatabaseTransaction,
+    group_id: i32,
+) -> Result<GroupModel, StatusCode> {
+    Group::find_by_id(group_id)
+        .one(txn)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::BAD_REQUEST)
+}
+
 pub async fn get_groups(
     txn: &DatabaseTransaction,
     user_id: i32,
