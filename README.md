@@ -19,3 +19,10 @@ SECRET="YOUR_SECRET"
 docker compose up --detach
 cargo run
 ```
+
+## How to use deploy script
+
+1. Download and install toolchain for prefered architecture, i.e. `armv7-unknown-linux-gnueabihf`.
+2. Install `vhome.service` systemd service on target system.
+3. Modify all variables in the `deploy` script.
+4. Run deploy script.

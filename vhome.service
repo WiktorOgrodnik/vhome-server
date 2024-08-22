@@ -1,0 +1,15 @@
+[Unit]
+Description=Vhome
+After=multi-user.target
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=/bin/bash -c "docker compose -f  /path/to/docker-compose.yml up --detach" 
+ExecStart=/path/to/server/bin
+ExecStop=/bin/bash -c "docker compose -f /path/to/docker-compose.yml stop"
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

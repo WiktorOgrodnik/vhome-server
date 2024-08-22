@@ -6,8 +6,8 @@ set -o pipefail
 set -o xtrace
 
 readonly TARGET_ARCH=armv7-unknown-linux-gnueabihf
-readonly TARGET_HOST=pi@majanska-piramida.hopto.org
-readonly TARGET_PATH=/home/pi/vhome_backend
+readonly TARGET_HOST=user@target.address
+readonly TARGET_PATH=/path/to/server
 readonly SOURCE_PATH=./target/${TARGET_ARCH}/release/server
 readonly DATABASE_PATH=./init.sql
 readonly COMPOSE_PATH=./docker-compose.yml
