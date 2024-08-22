@@ -26,3 +26,11 @@ cargo run
 2. Install `vhome.service` systemd service on target system.
 3. Modify all variables in the `deploy` script.
 4. Run deploy script.
+
+## ORM generated files
+
+After changing tables or relationships in the database, the structures generated for the ORM must be refreshed. This can be done with the sea-orm-cli tool using the command:
+
+```
+sea generate entity -o src/database
+```
