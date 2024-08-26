@@ -115,9 +115,9 @@ VALUES
 INSERT INTO vuser (login, passwd, created_at, picutre)
 VALUES
   ( 'Wiktor',  '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL ),
-  ( 'Michał',  '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL ),
+  ( 'Marek',  '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL ),
   ( 'Magda',   '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL ),
-  ( 'Krzysiu', '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL );
+  ( 'Krzysiek', '$2b$04$bD9NepMRGZGD2inNzenRNuRd01ZxjMjikNtQSvXgHseGfadszNq8e', NOW(), NULL );
 
 INSERT INTO user_groups (vuser_id, vgroup_id, role)
 VALUES
