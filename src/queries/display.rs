@@ -41,7 +41,7 @@ pub async fn add_pairing_code(
         ..Default::default()
     };
 
-    save_active_pairing_code(txn, pairing_code).await
+    insert_active_pairing_code(txn, pairing_code).await
 }
 
 pub async fn set_pairing_code_token(
@@ -66,6 +66,18 @@ pub async fn delete_pairing_code(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
 
+pub async fn insert_active_pairing_code(
+    txn: &DatabaseTransaction,
+    pairing_code: pairing_codes::ActiveModel,
+) -> Result<PairingCodeModel, StatusCode> {
+    pairing_code
+        .insert(txn)
+        .await
+        .map_err(|_| StatusCode::GONE)?
+        .try_into_model()
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+}
+
 pub async fn save_active_pairing_code(
     txn: &DatabaseTransaction,
     pairing_code: pairing_codes::ActiveModel,
@@ -73,7 +85,7 @@ pub async fn save_active_pairing_code(
     pairing_code
         .save(txn)
         .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .map_err(|_| StatusCode::GONE)?
         .try_into_model()
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
